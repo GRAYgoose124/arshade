@@ -1,7 +1,7 @@
 import arcade
 
 
-class PrimaryView(arcade.View):
+class ShaderView(arcade.View):
     def __init__(self):
         super().__init__()
 

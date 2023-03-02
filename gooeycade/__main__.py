@@ -1,11 +1,12 @@
 import arcade
 
-from .app.core import Application
+from .app.core import GooeyApp
 
 
 def main():
-    app = Application()
+    app = GooeyApp()
     arcade.run()
+
 
 if __name__ == "__main__":
     main()

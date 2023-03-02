@@ -4,9 +4,9 @@ from gooeycade.app.views.pause import PauseView
 from gooeycade.app.views.primary import PrimaryView
 
 
-class Application(arcade.Window):
+class GooeyApp(arcade.Window):
     def __init__(self):
-        super().__init__(800, 600, "Gooey Cade")
+        super().__init__(1280, 720, "Gooey Cade")
         self._views = {
             "primary": PrimaryView(),
             "pause": PauseView(),
@@ -24,7 +24,8 @@ class Application(arcade.Window):
             raise ValueError(f"View '{view}' does not exist.")
         
         # get the key of the current view
-        if self._current_view is not None:
+        if (self._current_view is not None and 
+            type(self._current_view) in [type(x) for x in self._views.values()]):
             key = {v: k for k, v in self._views.items()}[self._current_view]
             self._last_view = key
 
@@ -32,7 +33,4 @@ class Application(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
-            if self._current_view == "pause":
-                self.show_view(self._last_view)
-            else:
-                self.show_view("pause")
+            self.show_view("pause")
