@@ -1,14 +1,13 @@
 import arcade
 
-from gooeycade.app.views.pause import PauseView
-from gooeycade.app.views.primary import PrimaryView
+from gooeycade.app.views import PrimaryView, PauseView, ShaderView
 
 
 class GooeyApp(arcade.Window):
     def __init__(self):
         super().__init__(1280, 720, "Gooey Cade")
         self._views = {
-            "primary": PrimaryView(),
+            "primary": ShaderView(),
             "pause": PauseView(),
         }
         self._last_view = None

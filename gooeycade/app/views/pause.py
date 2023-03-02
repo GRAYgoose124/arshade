@@ -10,6 +10,7 @@ class PauseView(arcade.View):
 
         self._pause_screen = self.__build_pause_screen()
         self._settings_menu = self.__build_settings_menu()
+        self._exit_dialog_handle = None
 
         self.uimanager.add(arcade.gui.UIAnchorWidget(child=self._pause_screen, anchor_x="center", anchor_y="center"))
 
@@ -27,12 +28,14 @@ class PauseView(arcade.View):
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
-            dialog = arcade.gui.UIMessageBox(width=300, height=150, message_text="Are you sure you want to quit?",
+            self.uimanager.remove(self._exit_dialog_handle)
+            
+            self._exit_dialog_handle = arcade.gui.UIMessageBox(width=300, height=150, message_text="Are you sure you want to quit?",
                                                 buttons=("Ok", "Cancel"))
             
-            dialog._callback = self.__exit_game_dialog
+            self._exit_dialog_handle._callback = self.__exit_game_dialog
 
-            self.uimanager.add(dialog)
+            self.uimanager.add(self._exit_dialog_handle)
     
     # UI building
     def __build_pause_screen(self):
