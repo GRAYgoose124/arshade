@@ -1,4 +1,4 @@
-#version 330
+#version 430
 
 in vec2 g_uv;
 in vec3 g_color;
@@ -20,7 +20,6 @@ void main()
         alpha = min(1.0, g_strength - (l * 2));
     }
     vec3 c = g_color.rgb;
-    // c.xy += v_uv.xy * 0.05;
-    // c.xy += v_pos.xy * 0.75;
+    c.xy *= sin(gl_FragCoord.xy);
     out_color = vec4(c, alpha);
 }
