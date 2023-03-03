@@ -13,7 +13,7 @@ import time
 
 MIN_FADE_TIME = 0.25
 MAX_FADE_TIME = 1.5
-PARTICLE_COUNT = 3000
+PARTICLE_COUNT = 300
 
 
 @dataclass
@@ -29,6 +29,10 @@ class ShaderView(arcade.View):
         super().__init__()
         self.burst_list = []
 
+        self._hidden_pause = False
+        self._pause_shader = False
+        self._dt = 0
+
         # Load shader
         shader_root = Path(__file__).parent.parent.parent.parent / "shaders" / "basic"
         self.program = self.window.ctx.load_program(
@@ -37,33 +41,57 @@ class ShaderView(arcade.View):
         )
         self.window.ctx.enable_only(self.window.ctx.BLEND)
 
+    def __unpause(self):
+        # update all bursts so that there is no time jump
+        t = time.time() 
+        for burst in self.burst_list:
+            burst.start_time += abs(t - self._pause_shader)
+
+        self._pause_shader = False
+        self._hidden_pause = False
+
     def on_show(self):
+        if self._hidden_pause:
+            self.__unpause()
+
         arcade.set_background_color(arcade.color.BLACK)
+
+    def on_hide_view(self):
+        if not self._pause_shader:
+            self._hidden_pause = True
+            self._pause_shader = time.time()
 
     def on_draw(self):
         arcade.start_render()
 
         self.window.ctx.point_size = 2 * self.window.get_pixel_ratio()
+        t = time.time()
         for burst in self.burst_list:
             # Update uniforms
-            self.program['time'] = time.time() - burst.start_time
+            if not self._pause_shader:
+                self.program['time'] = 0.25 * (t - burst.start_time)
             # Render
-            burst.vao.render(self.program, mode=self.window.ctx.POINTS)
+            burst.vao.render(self.program, mode=self.window.ctx.TRIANGLE_STRIP)
 
     def on_update(self, dt):
         """ Update game """
         temp_list = self.burst_list.copy()
 
-        for burst in temp_list:
-            if time.time() - burst.start_time > MAX_FADE_TIME:
-               self.burst_list.remove(burst)
+        if not self._pause_shader:
+            t = time.time()
+            for burst in temp_list:
+                if t - burst.start_time > MAX_FADE_TIME:
+                    self.burst_list.remove(burst)
                
     def on_key_press(self, key, modifiers):
-        pass
+        if key == arcade.key.SPACE:
+            if self._pause_shader:
+                self.__unpause()
+            else:
+                self._pause_shader = time.time()
 
-    def on_mouse_press(self, x: float, y: float, button: int, modifiers: int):
-        """ User clicks mouse """
 
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
         def _gen_initial_data(initial_x, initial_y):
             """ Generate data for each particle """
             for i in range(PARTICLE_COUNT):
@@ -74,15 +102,15 @@ class ShaderView(arcade.View):
 
                 red = random.uniform(0.5, 1.0)
                 green = random.uniform(0, red)
-                blue = 0
+                blue = random.uniform(0, green)
 
                 fade_rate = random.uniform(1 / MAX_FADE_TIME, 1 / MIN_FADE_TIME)
 
                 yield initial_x
                 yield initial_y
 
-                yield dx
-                yield dy
+                yield dx - dx*0.1
+                yield dy - dy*0.1
 
                 yield red
                 yield green
