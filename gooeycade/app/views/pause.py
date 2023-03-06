@@ -36,6 +36,8 @@ class PauseView(arcade.View):
             self._exit_dialog_handle._callback = self.__exit_game_dialog
 
             self.uimanager.add(self._exit_dialog_handle)
+        
+        return super().on_key_press(key, modifiers)
     
     # UI building
     def __build_pause_screen(self):

@@ -24,9 +24,10 @@ class Swarm:
     window: arcade.Window
 
     program: arcade.gl.Program = field(default=None, init=False)
-    compute_program: arcade.gl.Program = field(default=None, init=False)
+    agent_program: arcade.gl.Program = field(default=None, init=False)
     group_size: namedtuple = field(default=namedtuple("ComputeGroup", ['x', 'y', 'z'])(x=256, y=1, z=1), init=False)
 
+    # TODO: Use framebuffer instead of manual flipping.
     ssbo1: arcade.gl.Buffer = field(default=None, init=False)
     ssbo2: arcade.gl.Buffer = field(default=None, init=False)
     vao1: arcade.gl.Geometry = field(default=None, init=False)
@@ -51,7 +52,7 @@ class Swarm:
             mode=self.window.ctx.POINTS
         )
 
-        shader_root = Path(__file__).parent.parent.parent.parent.parent / "shaders" / "swarm"
+        shader_root = Path(__file__).parent / "shaders"
         self.program = self.window.ctx.load_program(
             geometry_shader= shader_root / "geom.glsl",
             vertex_shader= shader_root / "vert.glsl",
@@ -61,7 +62,7 @@ class Swarm:
         compute_shader_source = (shader_root / "compute.glsl").read_text()
         compute_shader_source = compute_shader_source.replace("COMPUTE_SIZE_X", str(Swarm.group_size.x))
         compute_shader_source = compute_shader_source.replace("COMPUTE_SIZE_Y", str(Swarm.group_size.y))
-        self.compute_program = self.window.ctx.compute_shader(source=compute_shader_source)
+        self.agent_program = self.window.ctx.compute_shader(source=compute_shader_source)
 
     def _gen_initial_data(self, initial_x, initial_y):
         """ Generate data for each particle """
@@ -95,10 +96,17 @@ class Swarm:
         # self.compute_shader["force"] = force
         # self.compute_shader["time"] = time.time() - self.start_time
 
-        self.compute_program.run(group_x=Swarm.group_size.x, group_y=Swarm.group_size.y)
+        self.agent_program.run(group_x=Swarm.group_size.x, group_y=Swarm.group_size.y)
 
         self.vao2.render(self.program)
 
         # flip buffers
         self.ssbo1, self.ssbo2 = self.ssbo2, self.ssbo1
         self.vao1, self.vao2 = self.vao2, self.vao1
+
+    def on_update(self, delta_time):
+        try:
+            self.program["time"] = time.time() - self.start_time
+        except KeyError:
+            # glsl optimizes out unused uniforms :x
+            pass    

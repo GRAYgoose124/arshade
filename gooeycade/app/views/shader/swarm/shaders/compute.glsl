@@ -47,8 +47,8 @@ void main()
         float distanceSquared = dist * dist;
 
         float minDistance = 0.01;
-        float gravityStrength = 0.2;
-        float simulationSpeed = 0.002;
+        float gravityStrength = 0.003;
+        float simulationSpeed = 0.5;
         float force = min(minDistance, gravityStrength / distanceSquared) * -simulationSpeed;
 
         vec3 diff = p.xyz - In.balls[i].pos.xyzw.xyz;
