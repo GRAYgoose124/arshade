@@ -45,11 +45,11 @@ class Swarm:
         attributes = ["in_vertex", "in_color"]
         self.vao1 = self.window.ctx.geometry(
             [arcade.gl.BufferDescription(self.ssbo1, buffer_format, attributes)],
-            mode=self.window.ctx.POINTS
+            mode=self.window.ctx.TRIANGLES
         )
         self.vao2 = self.window.ctx.geometry(
             [arcade.gl.BufferDescription(self.ssbo2, buffer_format, attributes)],
-            mode=self.window.ctx.POINTS
+            mode=self.window.ctx.TRIANGLES
         )
 
         shader_root = Path(__file__).parent / "shaders"
