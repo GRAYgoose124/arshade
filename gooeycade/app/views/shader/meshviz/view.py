@@ -21,10 +21,10 @@ class MeshView(ShaderView):
             fragment_shader = shader_root / "frag.glsl",
         )
 
-        self.mesh_view_program["projection"] = Mat4.perspective_projection(self.window.aspect_ratio, .1, 100, 70)
+        self.mesh_view_program["projection"] = Mat4.perspective_projection(self.window.aspect_ratio, 1.0, 10.0, 70)
 
         # TODO: on_show? on_hide_view?
-        self.window.ctx.enable_only(self.window.ctx.BLEND)
+        self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
 
     @property
     def mesh(self):
