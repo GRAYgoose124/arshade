@@ -13,7 +13,7 @@ class MeshView(ShaderView):
         super().__init__()
 
         self.time = 0
-        self._mesh = MeshBuilder.build_mesh()
+        self._mesh = MeshBuilder(self.window).geometry_from_file("meshes/cube.obj", resize=0.5)
         shader_root = Path(__file__).parent / "shaders"
         self.mesh_view_program = self.window.ctx.load_program(
             vertex_shader   = shader_root / "vert.glsl",
@@ -41,7 +41,7 @@ class MeshView(ShaderView):
         rotate = Mat4.from_rotation(self.time / 2, (1, 0, 0))
         self.mesh_view_program["model"] = rotate @ translate
         # Run the shader and render
-        self.mesh.render(self.mesh_view_program)
+        self.mesh.render(self.mesh_view_program, mode=self.window.ctx.TRIANGLES)
 
     def __unpause(self):
         self.mesh.start_time += abs(self.time - self._pause_shader)
