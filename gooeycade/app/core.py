@@ -12,9 +12,12 @@ class GooeyApp(arcade.Window):
         self.center_window()
         
         self._views = {
-            "primary": MeshView(),
-            "pause": PauseView(),
+            "primary": PrimaryView(),
+            "mesh": MeshView(),
+            "swarm": SwarmView(),
+            "pause": None,
         }
+        self._views["pause"] = PauseView()
 
         self._last_view = None
 

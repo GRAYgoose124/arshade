@@ -23,7 +23,7 @@ class MeshView(ShaderView):
 
         self.mesh_view_program["projection"] = Mat4.perspective_projection(self.window.aspect_ratio, 1.0, 10.0, 70)
 
-        # TODO: on_show? on_hide_view?
+        # TODO: on_show? on_hide_view? Issue: On Windows, it doesn't appear the arcade window has a depth buffer.
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
 
     @property
@@ -49,4 +49,9 @@ class MeshView(ShaderView):
     
     def on_update(self, delta_time):
         self.time += delta_time
+
+    def on_show(self):
+        self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
+
+        return super().on_show()
         
