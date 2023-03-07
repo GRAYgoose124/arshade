@@ -15,8 +15,11 @@ class MeshBuilder:
         path = Path(__file__).parent / path
 
         #m = pyglet.model.load(str(path))
-        m = pyglet.model.codecs.obj.parse_obj_file(str(path))[0]
-
+        try:
+            m = pyglet.model.codecs.obj.parse_obj_file(str(path))[0]
+        except IndexError:
+            raise ValueError(f"Could not load mesh from {path} - make sure it has a material!")
+        
         # vertices is a list of 3-tuples, but m.vertices is a list of floats, so we need to reshape it
         vertices = np.array(m.vertices, dtype=np.float32).reshape(-1, 3) * resize
         normals = np.array(m.normals, dtype=np.float32).reshape(-1, 3) * resize
