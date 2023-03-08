@@ -1,6 +1,7 @@
 import arcade
 import time
 from pyglet.math import Mat4
+from arcade.experimental.texture_render_target import RenderTargetTexture
 
 from pathlib import Path
 
@@ -26,6 +27,12 @@ class MeshView(ShaderView):
         # TODO: on_show? on_hide_view? Issue: On Windows, it doesn't appear the arcade window has a depth buffer.
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
 
+        # Lets render to an FBO with a depth attachment instead
+        self.render_fbo = self.window.ctx.framebuffer(
+            color_attachments=[self.window.ctx.texture((self.window.width, self.window.height), components=4)],
+            depth_attachment=self.window.ctx.depth_texture((self.window.width, self.window.height))
+        )
+
     @property
     def mesh(self):
         return self._mesh
@@ -38,10 +45,16 @@ class MeshView(ShaderView):
         arcade.start_render()
 
         translate = Mat4.from_translation((0, 0, -2))
-        rotate = Mat4.from_rotation(self.time / 2, (1, 0, 0))
+        rotate = Mat4.from_rotation(self.time / 2, (1, .5, 0))
         self.mesh_view_program["model"] = rotate @ translate
+
         # Run the shader and render
-        self.mesh.render(self.mesh_view_program, mode=self.window.ctx.TRIANGLES)
+        with self.render_fbo:
+            self.render_fbo.clear()
+            self.mesh.render(self.mesh_view_program, mode=self.window.ctx.TRIANGLES)
+
+        # Render the FBO to the screen
+        self.window.ctx.copy_framebuffer(self.render_fbo, self.window.ctx.screen)
 
     def __unpause(self):
         self.mesh.start_time += abs(self.time - self._pause_shader)

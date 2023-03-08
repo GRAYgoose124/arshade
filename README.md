@@ -1,5 +1,14 @@
 # About
-This project has a number of experimental Views.
+Python and Arcade let you mess around, so I'm doing that.
+
+# Installation
+    poetry install
+
+# Usage
+Run the app wih the following:
+    gcade
+
+There are a number of views that can be chosen from the pause menu.
 ## Views
 ### Meta (unfinished)
 A view selector.
