@@ -99,6 +99,9 @@ class PauseView(arcade.View):
 
         # self.window._views is a dictionary of views keyed by name
         for i, view_name in enumerate(self.window.views):
+            if view_name == "pause":
+                continue
+            
             view_button = arcade.gui.UIFlatButton(text=view_name, width=200, height=50)
             view_button.on_click = lambda _, view_name=view_name: self.__select_view(view_name)
             menu.add(arcade.gui.UIAnchorWidget(child=view_button, anchor_x="center", anchor_y="right", 
