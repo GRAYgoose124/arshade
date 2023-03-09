@@ -21,7 +21,7 @@ class GooeyApp(arcade.Window):
 
         self._last_view = None
 
-        self.show_view("primary")
+        self.show_view("mesh" or "primary")
 
     @property
     def views(self):

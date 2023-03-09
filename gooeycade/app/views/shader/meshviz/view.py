@@ -1,8 +1,8 @@
 import arcade
+import arcade.gui
 import time
-from pyglet.math import Mat4
-from arcade.experimental.texture_render_target import RenderTargetTexture
 
+from pyglet.math import Mat4
 from pathlib import Path
 
 from .mesh import MeshBuilder
@@ -22,6 +22,10 @@ class MeshView(ShaderView):
 
         # Lets render to an FBO with a depth attachment instead
         self.render_fbo = self.__build_render_fbo()
+
+        # UI
+        self.manager = arcade.gui.UIManager(self.window)
+        self.manager.add(self.__build_mesh_selector())
 
     @property
     def mesh(self):
@@ -65,7 +69,16 @@ class MeshView(ShaderView):
             color_attachments=[self.window.ctx.texture((self.window.width, self.window.height), components=4)],
             depth_attachment=self.window.ctx.depth_texture((self.window.width, self.window.height))
         )
+    
+    def __build_mesh_selector(self):
+        """ Builds the Mesh Viewer's selection GUI. """
+        menu = arcade.gui.UIBoxLayout()
 
+        label = arcade.gui.UITextArea(text="Mesh", font_size=24, text_color=arcade.color.WHITE)
+        menu.add(arcade.gui.UIAnchorWidget(child=label, anchor_x="left", anchor_y="top"))
+
+        return menu
+    
     def __draw_mesh(self):
         translate = Mat4.from_translation((0, 0, -2))
         rotate = Mat4.from_rotation(self._time / 2, (1, .5, 0))
@@ -81,14 +94,21 @@ class MeshView(ShaderView):
         arcade.start_render()
 
         self.__draw_mesh()
+
+        self.manager.draw()
     
     def on_update(self, delta_time):
         self._time += delta_time
 
     def on_show(self):
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
+        self.manager.enable()
 
         return super().on_show()
+    
+    def on_hide_view(self):
+        self.manager.disable()
+        return super().on_hide_view()
     
     def on_resize(self, width: int, height: int):
         # rebuild the FBO with the new size
