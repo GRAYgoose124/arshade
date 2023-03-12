@@ -1,6 +1,9 @@
+import traceback
 import arcade
 import arcade.gui
 import time
+import pyglet
+import logging
 
 from pyglet.math import Mat4
 from pathlib import Path
@@ -9,33 +12,83 @@ from .mesh import MeshBuilder
 from ..shader import ShaderView
 
 
+logger = logging.getLogger(__name__)
+
+
 class MeshView(ShaderView):
+    """ A view that renders a selected mesh. """
     def __init__(self):
         super().__init__()
-
         self._time = 0
+        self._start_time = 0
 
-        self._mesh = MeshBuilder(self.window).geometry_from_file("meshes/torus.obj", resize=0.5)
+        self.__mesh = None
+        self._mesh_path = None
 
-        self.program = self.__load_mesh_shader()
-        # TODO: on_show? on_hide_view? Issue: On Windows, it doesn't appear the arcade window has a depth buffer.
+        self.__program = None
+        self.__render_fbo = None
 
-        # Lets render to an FBO with a depth attachment instead
-        self.render_fbo = self.__build_render_fbo()
+        self._ui_manager = None
+
+        self.setup()
+
+    def setup(self):
+        self._time = 0
+        self._start_time = time.time()
+
+        self.__load_mesh_from_file("cube.obj", resize=0.5)
+
+        # prepare graphics
+        self.__program = self.__load_mesh_shader()
+        self.__render_fbo = self.__build_render_fbo()
 
         # UI
-        self.manager = arcade.gui.UIManager(self.window)
-        self.manager.add(self.__build_mesh_selector())
+        self._ui_manager = arcade.gui.UIManager(self.window)
+        self._ui_manager.add(self.__build_mesh_selector())
 
     @property
-    def mesh(self):
-        return self._mesh
+    def time(self):
+        """ Returns the shader time."""
+        return self._time
     
-    @mesh.setter
-    def mesh(self, mesh):
-        self._mesh = mesh
+    @property
+    def start_time(self):
+        """ Returns the shader start time."""
+        return self._start_time
+    
+    @property
+    def mesh(self):
+        """ Returns the mesh to be rendered. """
+        return self.__mesh
+    
+    @property
+    def mesh_path(self):
+        """ Returns the path to the mesh to be rendered. """
+        return self._mesh_path
+    
+    @mesh_path.setter
+    def mesh_path(self, path):
+        """ Sets the path to the mesh to be rendered and reloads the mesh. """
+        self.__load_mesh_from_file(path)
+
+    @property
+    def manager(self):
+        """ Returns the UI manager. """
+        return self._ui_manager
+    
+    def __load_mesh_from_file(self, path: Path | str, resize: float = 1.0):
+        """ Loads a mesh from a file. OBJ support only."""
+        self._mesh_path = Path(__file__).parent / "meshes" / path
+
+        try:
+            self.__mesh = MeshBuilder(self.window).geometry_from_file(self._mesh_path, resize=resize)
+        except (pyglet.model.codecs.ModelDecodeException, FileNotFoundError) as e:
+            logger.warning(f"Failed to load mesh: {self.mesh_path}.")
+            traceback.print_exc()
+            self.__mesh = None
 
     def __load_mesh_shader(self, vert=None, frag=None, geom=None, shader_root=None):
+        """ Loads a shader program for rendering the mesh. """
         default_root = Path(__file__).parent / "shaders"
         if shader_root is None:
             shader_root = default_root
@@ -65,6 +118,7 @@ class MeshView(ShaderView):
         return program
 
     def __build_render_fbo(self):
+        """ Builds the framebuffer object for off-screen rendering. """
         return self.window.ctx.framebuffer(
             color_attachments=[self.window.ctx.texture((self.window.width, self.window.height), components=4)],
             depth_attachment=self.window.ctx.depth_texture((self.window.width, self.window.height))
@@ -80,36 +134,49 @@ class MeshView(ShaderView):
         return menu
     
     def __draw_mesh(self):
-        translate = Mat4.from_translation((0, 0, -2))
-        rotate = Mat4.from_rotation(self._time / 2, (1, .5, 0))
-        self.program["model"] = rotate @ translate
+        """ Draws the mesh to the screen. """
+        with self.__render_fbo:
+            self.__render_fbo.clear()
 
-        with self.render_fbo:
-            self.render_fbo.clear()
-            self.mesh.render(self.program, mode=self.window.ctx.TRIANGLES)
+            self.mesh.render(self.__program, mode=self.window.ctx.TRIANGLES)
 
-        self.window.ctx.copy_framebuffer(self.render_fbo, self.window.ctx.screen)
+        self.window.ctx.copy_framebuffer(self.__render_fbo, self.window.ctx.screen)
 
     def on_draw(self):
         arcade.start_render()
 
-        self.__draw_mesh()
+        # TODO: Add a loading screen when no mesh is loaded and disable the mesh render.
+        # Note: This should be alright because drawing only needs to be performed when a mesh is loaded.
+        try:
+            self.__draw_mesh()
+        except AttributeError:
+            pass
 
-        self.manager.draw()
+        self._ui_manager.draw()
     
     def on_update(self, delta_time):
         self._time += delta_time
 
+        if self.mesh is None:
+            # TODO: Add mesh to a ui manager and disable it when no mesh is loaded.
+            self.__load_mesh_from_file("cube.obj", resize=0.1)
+            return
+        
+        # update the model matrix
+        translate = Mat4.from_translation((0, 0, -2))
+        rotate = Mat4.from_rotation(self.time / 2, (1, .5, 0))
+        self.__program["model"] = rotate @ translate
+
     def on_show(self):
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
-        self.manager.enable()
+        self._ui_manager.enable()
 
         return super().on_show()
     
     def on_hide_view(self):
-        self.manager.disable()
+        self._ui_manager.disable()
         return super().on_hide_view()
     
     def on_resize(self, width: int, height: int):
         # rebuild the FBO with the new size
-        self.render_fbo = self.__build_render_fbo()
+        self.__render_fbo = self.__build_render_fbo()
