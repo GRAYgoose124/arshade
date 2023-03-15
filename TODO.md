@@ -1,0 +1,1 @@
+- Move self.program from the views in views.shader to ShaderView and override in subclasses.
