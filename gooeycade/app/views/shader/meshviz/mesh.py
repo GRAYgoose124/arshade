@@ -2,6 +2,7 @@ import arcade
 import arcade.gl as gl
 import numpy as np
 import pyglet
+import pyglet.gl
 
 from pathlib import Path
 
@@ -29,6 +30,9 @@ class MeshBuilder:
         return self.window.ctx.geometry([gl.BufferDescription(self.window.ctx.buffer(data=vertices), "3f", ["in_position"]),
                                         gl.BufferDescription(self.window.ctx.buffer(data=normals), "3f", ["in_normal"]),
                                         gl.BufferDescription(self.window.ctx.buffer(data=tex_coords), "2f", ["in_uv"])])
+
+    def geometry_from_vbo():
+        pass
 
     @staticmethod
     def build_mesh() -> gl.Geometry:
