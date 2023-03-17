@@ -16,12 +16,9 @@ out vec4 col;
 void main()
 {
     vec3 new_pos = in_pos;
-    new_pos.xy = mat2(cos(time * (1.0 - in_id)), -sin(time * (1.0 - in_id)), sin(time * (1.0 - in_id)), cos(time * (1.0 - in_id))) * in_pos.xz;
+    new_pos.xy = mat2(cos(time * (1.0 - in_id)), -sin(time * (1.0 - in_id)), sin(time * (1.0 - in_id)), cos(time * (1.0 - in_id))) * in_pos.xy;
 
-    new_pos *= in_id;
-
-    float id = in_id * INV_ID_MAX;
     gl_Position = vec4(new_pos.xyz, 1.0);
-    gl_PointSize = 4.0;
+    gl_PointSize = 2.0;
     col = vec4(in_col.xyz, 1.);
 }

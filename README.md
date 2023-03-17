@@ -15,6 +15,9 @@ A view selector.
 ### Wrigger (unfinished)
 Procedural model gen using self-organizing space-filling curves.
 ### Swarm (unfinished)
-Compute shader based swarm/flocking sim.
+Compute shader based swarm/flocking sim. (N-body for now)
 ### MeshViz (unfinished)
 Mesh viewer with rudimentary STL support.
+### Mandala (unfinished)
+2D LINES based art visualizer.
+![](https://raw.githubusercontent.com/GRAYgoose124/arshade/main/screenshots/mand1.jpg)
