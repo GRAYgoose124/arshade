@@ -9,7 +9,7 @@ from math import cos, sin, pi
 from array import array 
 from pathlib import Path
 
-from .description import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
+from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 
 class MandalaView(arcade.View):
@@ -28,7 +28,10 @@ class MandalaView(arcade.View):
     def setup(self):
         self.__start_time = time.time()
         
-        descr = ParallelSpiralOrbit(render_modes=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS))
+        # TODO: This should be configurable, but initial_data isn't properly set when rebuilt from json (because it's tied to the subclass :X)
+        # descr = ProgramDefinition.from_json(Path(__file__).parent / "configs" / "parallel.json")
+        descr = SinCosOrbit()
+
         self.description = descr
         self.__start_time += descr.time_offset
 
@@ -77,7 +80,7 @@ class MandalaView(arcade.View):
 
         if self.__modelview_enabled:
             translate = Mat4.from_translation((0, 0, 0))
-            rotate = Mat4.from_rotation(sin(self.program['time'] * self.description.speed) * 2 * pi, (0., 0., 1.)) 
+            rotate = Mat4.from_rotation(sin(self.program['time'] * 0.001) * 2 * pi, (-.5, .5, .0)) 
             try:
                 self.program["model"] = rotate @ translate
             except KeyError:
@@ -91,7 +94,6 @@ class MandalaView(arcade.View):
         if mode is not None:
             self.vao.render(program=self.program, mode=mode)
         
-        arcade.gl.LINE_STRIP
         mode = self.description.render_modes[1]
         if mode is not None:
             self.vao.render(program=self.program, mode=mode)
