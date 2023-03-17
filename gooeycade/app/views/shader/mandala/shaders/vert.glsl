@@ -1,22 +1,27 @@
-#version 430
+#version 450 core
 
 uniform float time;
 uniform mat4 model;
 
+#define INV_ID_MAX 0.008
+// The id of the point
+in float in_id;
+// The position of the point
 in vec3 in_pos;
+// The default color of the point
 in vec3 in_col;
 
 out vec4 col;
 
 void main()
 {
-    // calculate z_plane for better clipping
-    float z_plane = in_pos.z * 0.1;
-    vec3 new_pos = vec3(in_pos.x * cos(time*in_pos.x), in_pos.y * sin(time*in_pos.y), in_pos.y*cos(time)*sin(time));
+    vec3 new_pos = in_pos;
+    new_pos.xy = mat2(cos(time * (1.0 - in_id)), -sin(time * (1.0 - in_id)), sin(time * (1.0 - in_id)), cos(time * (1.0 - in_id))) * in_pos.xz;
 
-    gl_Position = model * vec4(new_pos.xyz, 1.0);
-    gl_PointSize = 20.0;
+    new_pos *= in_id;
 
-    // set output color directly from input
+    float id = in_id * INV_ID_MAX;
+    gl_Position = vec4(new_pos.xyz, 1.0);
+    gl_PointSize = 4.0;
     col = vec4(in_col.xyz, 1.);
 }

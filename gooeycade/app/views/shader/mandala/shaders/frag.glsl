@@ -1,5 +1,8 @@
 #version 450
 
+
+uniform float time;
+
 // Color passed in from the vertex shader
 in vec4 col;
 
