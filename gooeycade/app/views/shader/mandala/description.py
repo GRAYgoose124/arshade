@@ -1,8 +1,10 @@
+import json
 import pyglet
 
 from dataclasses import dataclass, field
 from math import cos, sin
 
+#TODO: configs
 #TODO: uniforms / blocks
 
 @dataclass
@@ -10,30 +12,48 @@ class ProgramDefinition:
     vert_shader: str | None = field(default=None, kw_only=True)
     description: tuple[str, list[str]] | None = field(default=None, kw_only=True)
     modelview_enabled: bool = False
+    point_size: float = 1.0
     time_offset: float = 0.0
     speed: float = 1.0
     render_modes: tuple[int, int] = field(default=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS), kw_only=True)
+    N: int = 1000
 
-    def initial_data(self, N=0):
+    def initial_data(self):
+        N = self.N
         raise NotImplementedError
     
+    @classmethod
+    def from_dict(cls, d: dict):
+        return cls(**d)
+    
+    @classmethod
+    def from_json(cls, json: str):
+        return cls.from_dict(json.loads(json))
+    
+    def to_dict(self):
+        return self.__dataclass_fields__
+    
+    def to_json(self):
+        return json.dumps(self.to_dict())
 
     
 @dataclass
 class ParallelSpiralOrbit(ProgramDefinition):
     vert_shader: str | None = field(default="parallel_spiral_orbit.glsl", kw_only=True)
     description: tuple[str, list[str]] | None = field(default=("f 3f 3f", ["in_id", "in_pos", "in_col"]))
-    time_offset: float = 0.0
-    speed: float = 0.001
+    time_offset: float = 900.0
+    point_size: float = 4.0
+    speed: float = 0.0001
     render_modes: tuple[int, int] = field(default=(pyglet.gl.GL_LINES, pyglet.gl.GL_POINTS), kw_only=True)
+    N: int = 10000
 
-    def initial_data(self, N=10000):
+    def initial_data(self):
         """ This generates a set of points along a radius of a circle which are then rotated at different rates. """
+        N = self.N
         for i in range(N):
-            # all points start at the same angle - 0.0
             angle = 0.0
-            # each point is offset along the radius tiny gap between each point
-            radius = (i / N)
+            # outside point and inside point are fixed
+            radius = ((N-(i + 1)) / N)
             
             x = radius * cos(angle)
             y = radius * cos(angle)
@@ -59,9 +79,11 @@ class SinCosOrbit(ProgramDefinition):
     vert_shader: str | None = field(default="sincos_orbit.glsl", kw_only=True)
     description: tuple[str, list[str]] | None = field(default=("3f 3f", ["in_pos", "in_col"]), kw_only=True)
     modelview_enabled: bool = True
+    N = 1000
 
-    def initial_data(self, N=1000):
+    def initial_data(self):
         """ Think a deconstructed spiral along the X/Y plane """
+        N = self.N
         for i in range(N):
             angle = (i / N) * 2.0 * 3.14159
             radius = 0.5 + (i / N) * 0.5

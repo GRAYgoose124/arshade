@@ -6,6 +6,17 @@ class PauseView(arcade.View):
     def __init__(self):
         super().__init__()
 
+        self.uimanager = None
+        self._pause_screen = None
+        self._settings_menu = None
+        self._view_select_menu = None
+        self._exit_dialog_handle = None
+
+        self._selected_view = None
+
+        self.setup()
+
+    def setup(self):
         self.uimanager = arcade.gui.UIManager()
 
         self._pause_screen = self.__build_pause_screen()
@@ -15,7 +26,13 @@ class PauseView(arcade.View):
 
         self._selected_view = None
 
-        self.uimanager.add(arcade.gui.UIAnchorWidget(child=self._pause_screen, anchor_x="center", anchor_y="center"))
+        self.uimanager.add(arcade.gui.UIAnchorWidget(child=self._pause_screen, anchor_x="center", anchor_y="center"))  
+
+    def on_resize(self, width: int, height: int):
+        return super().on_resize(width, height)
+    
+        # Rebuild the UI because it's size-relative.
+        self.setup()
 
     def on_show(self):
         arcade.set_background_color(arcade.color.AMAZON)

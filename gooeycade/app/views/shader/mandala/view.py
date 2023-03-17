@@ -28,7 +28,7 @@ class MandalaView(arcade.View):
     def setup(self):
         self.__start_time = time.time()
         
-        descr = ParallelSpiralOrbit()
+        descr = ParallelSpiralOrbit(render_modes=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS))
         self.description = descr
         self.__start_time += descr.time_offset
 
@@ -39,6 +39,7 @@ class MandalaView(arcade.View):
         self.program = self.window.ctx.load_program(vertex_shader=default_root / descr.vert_shader, fragment_shader=default_root / "frag.glsl")
        
         try:
+            self.program['point_size'] = descr.point_size
             self.program['time'] = 0.0
             self.program['model'] = Mat4()
         except KeyError:
@@ -46,7 +47,7 @@ class MandalaView(arcade.View):
 
     def on_show(self):
         #self.__old_size = self.window.get_size()
-        self.window.set_size(1420, 1420)
+        #self.window.set_size(1420, 1420)
 
         arcade.set_background_color(arcade.color.BLACK)
         self.window.ctx.enable_only(self.window.ctx.PROGRAM_POINT_SIZE, pyglet.gl.GL_LINE_SMOOTH, pyglet.gl.GL_BLEND)
