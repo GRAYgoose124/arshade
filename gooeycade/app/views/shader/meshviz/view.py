@@ -36,7 +36,8 @@ class MeshView(ShaderView):
         self._time = 0
         self._start_time = time.time()
 
-        self.__load_mesh_from_file("cube.obj", resize=0.5)
+        # TODO GUI selector
+        self.__load_mesh_from_file("cube.obj", resize=.5)
 
         # prepare graphics
         self.__program = self.__load_mesh_shader()
@@ -163,7 +164,7 @@ class MeshView(ShaderView):
             return
         
         # update the model matrix
-        translate = Mat4.from_translation((0, 0, -2))
+        translate = Mat4.from_translation((0, 0, -2.5))
         rotate = Mat4.from_rotation(self.time / 2, (1, .5, 0))
         self.__program["model"] = rotate @ translate
 

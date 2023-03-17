@@ -9,73 +9,7 @@ from math import cos, sin, pi
 from array import array 
 from pathlib import Path
 
-
-@dataclass
-class ProgramDefinition:
-    vert_shader: str | None = field(default=None, kw_only=True)
-    description: tuple[str, list[str]] | None = field(default=None, kw_only=True)
-
-    def initial_data(self, N=0):
-        raise NotImplementedError
-    
-
-    
-@dataclass
-class ParallelSpiralOrbit(ProgramDefinition):
-    vert_shader: str | None = field(default="parallel_spiral_orbit.glsl", kw_only=True)
-    description: tuple[str, list[str]] | None = field(default=("f 3f 3f", ["in_id", "in_pos", "in_col"]))
-
-    def initial_data(self, N=10000):
-        """ This generates a set of points along a radius of a circle which are then rotated at different rates. """
-        for i in range(N):
-            # all points start at the same angle - 0.0
-            angle = 0.0
-            # each point is offset along the radius tiny gap between each point
-            radius = (i / N)
-            
-            x = radius * cos(angle)
-            y = radius * cos(angle)
-            z = 0.0
-
-            r = cos(i)
-            g = sin(i)
-            b = 0.25 + cos(i) * sin(i)
-
-            yield i
-
-            yield x
-            yield y
-            yield z
-
-            yield r
-            yield g
-            yield b
-
-
-@dataclass
-class SinCosOrbit(ProgramDefinition):
-    vert_shader: str | None = field(default="sincos_orbit.glsl", kw_only=True)
-    description: tuple[str, list[str]] | None = field(default=("3f 3f", ["in_pos", "in_col"]), kw_only=True)
-
-    def initial_data(self, N=10000):
-        """ Think a deconstructed spiral along the X/Y plane """
-        for i in range(N):
-            angle = (i / N) * 2.0 * 3.14159
-            radius = 0.5 + (i / N) * 0.5
-            x = radius * cos(angle)
-            y = radius * sin(angle)
-            z = 1.+ 1. / (i+1)
-            r = (cos(angle * 3.0) + 1.0) / 2.0
-            g = (cos(angle * 5.0) + 1.0) / 2.0
-            b = (cos(angle * 7.0) + 1.0) / 2.0
-
-            yield x
-            yield y
-            yield z
-
-            yield r 
-            yield g
-            yield b
+from .description import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 
 class MandalaView(arcade.View):
@@ -84,6 +18,7 @@ class MandalaView(arcade.View):
         self.__start_time = 0
         self.__program_has_time_uniform = True
         self.__modelview_enabled = False
+        self.description = None
 
         self.vao = None
         self.program = None
@@ -94,8 +29,10 @@ class MandalaView(arcade.View):
         self.__start_time = time.time()
         
         descr = ParallelSpiralOrbit()
+        self.description = descr
+        self.__start_time += descr.time_offset
 
-
+        self.__modelview_enabled = descr.modelview_enabled
         self.vao = self.__build_mesh(description=descr)
 
         default_root = Path(__file__).parent / "shaders"
@@ -108,12 +45,16 @@ class MandalaView(arcade.View):
             pass
 
     def on_show(self):
+        #self.__old_size = self.window.get_size()
+        self.window.set_size(1420, 1420)
+
         arcade.set_background_color(arcade.color.BLACK)
-        self.window.ctx.enable_only(self.window.ctx.PROGRAM_POINT_SIZE)
+        self.window.ctx.enable_only(self.window.ctx.PROGRAM_POINT_SIZE, pyglet.gl.GL_LINE_SMOOTH, pyglet.gl.GL_BLEND)
         self.setup()
 
     def on_hide_view(self):
         pass
+        #self.window.set_size(*self.__old_size)
 
     def __build_mesh(self, description: ProgramDefinition):
         # create a vertex buffer object (VBO) containing the positions of the points
@@ -129,13 +70,13 @@ class MandalaView(arcade.View):
     def on_update(self, delta_time: float):
         if self.__program_has_time_uniform:
             try:
-                self.program['time'] = (time.time() - self.__start_time) * 0.001
+                self.program['time'] = (time.time() - self.__start_time) * self.description.speed
             except KeyError:
                 pass
 
         if self.__modelview_enabled:
             translate = Mat4.from_translation((0, 0, 0))
-            rotate = Mat4.from_rotation(sin(self.program['time'] * 0.25) * 2 * pi, (0., 0., 1.)) 
+            rotate = Mat4.from_rotation(sin(self.program['time'] * self.description.speed) * 2 * pi, (0., 0., 1.)) 
             try:
                 self.program["model"] = rotate @ translate
             except KeyError:
@@ -145,8 +86,14 @@ class MandalaView(arcade.View):
     def on_draw(self):
         arcade.start_render()
 
-        self.vao.render(program=self.program, mode=arcade.gl.LINE_STRIP)
-        self.vao.render(program=self.program, mode=arcade.gl.POINTS)
+        mode = self.description.render_modes[0]
+        if mode is not None:
+            self.vao.render(program=self.program, mode=mode)
+        
+        arcade.gl.LINE_STRIP
+        mode = self.description.render_modes[1]
+        if mode is not None:
+            self.vao.render(program=self.program, mode=mode)
 
  
     def on_key_press(self, key, modifiers):

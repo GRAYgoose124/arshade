@@ -3,7 +3,6 @@
 uniform float time;
 uniform mat4 model;
 
-#define INV_ID_MAX 0.008
 // The id of the point
 in float in_id;
 // The position of the point
@@ -16,9 +15,10 @@ out vec4 col;
 void main()
 {
     vec3 new_pos = in_pos;
-    new_pos.xy = mat2(cos(time * (1.0 - in_id)), -sin(time * (1.0 - in_id)), sin(time * (1.0 - in_id)), cos(time * (1.0 - in_id))) * in_pos.xy;
+    float t = (time) * (1.0 - in_id);
+    new_pos.xy = mat2(cos(t), -sin(t), sin(t), cos(t)) * in_pos.xy;
 
     gl_Position = vec4(new_pos.xyz, 1.0);
-    gl_PointSize = 2.0;
+    gl_PointSize = 4.0;
     col = vec4(in_col.xyz, 1.);
 }

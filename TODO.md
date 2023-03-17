@@ -1,1 +1,4 @@
 - Move self.program from the views in views.shader to ShaderView and override in subclasses.
+- mandala.description is terribly lazy
+- display texture data in meshviz
+- mesh selection in meshviz
