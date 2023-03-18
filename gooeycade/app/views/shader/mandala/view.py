@@ -3,7 +3,7 @@ import time
 import arcade
 import arcade.gl
 import pyglet
-from pyglet.math import Mat4
+from pyglet.math import Mat4, Vec3
 
 from math import cos, sin, pi
 from array import array 
@@ -18,6 +18,7 @@ class MandalaView(arcade.View):
         self.__start_time = 0
         self.__program_has_time_uniform = True
         self.__modelview_enabled = False
+        self.__modelview_orthogonal = True
         self.description = None
 
         self.vao = None
@@ -30,7 +31,7 @@ class MandalaView(arcade.View):
         
         # TODO: This should be configurable, but initial_data isn't properly set when rebuilt from json (because it's tied to the subclass :X)
         # descr = ProgramDefinition.from_json(Path(__file__).parent / "configs" / "parallel.json")
-        descr = SinCosOrbit()
+        descr = ParallelSpiralOrbit()
 
         self.description = descr
         self.__start_time += descr.time_offset
@@ -53,7 +54,7 @@ class MandalaView(arcade.View):
         #self.window.set_size(1420, 1420)
 
         arcade.set_background_color(arcade.color.BLACK)
-        self.window.ctx.enable_only(self.window.ctx.PROGRAM_POINT_SIZE, pyglet.gl.GL_LINE_SMOOTH, pyglet.gl.GL_BLEND)
+        self.window.ctx.enable_only(self.window.ctx.PROGRAM_POINT_SIZE)
         self.setup()
 
     def on_hide_view(self):
@@ -79,10 +80,21 @@ class MandalaView(arcade.View):
                 pass
 
         if self.__modelview_enabled:
-            translate = Mat4.from_translation((0, 0, 0))
-            rotate = Mat4.from_rotation(sin(self.program['time'] * 0.001) * 2 * pi, (-.5, .5, .0)) 
+            rotate = Mat4.from_rotation(sin(self.program['time'] * self.description.rotation_speed * (1/self.description.speed)) * 2 * pi, Vec3(-.2, .6, .2))
+            model = Mat4.from_translation(Vec3(0, 0, 1.)).scale(Vec3(1., 1., 1.))  @ rotate
+
+
+            view = Mat4().look_at(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(1, 0, -1))
+
+            if self.__modelview_orthogonal:
+                projection = Mat4().orthogonal_projection(-1.5, 1.5, -1, 1, -5, 5)
+            else:
+                projection = Mat4().perspective_projection(45, 1, 0.01, 100)
+
             try:
-                self.program["model"] = rotate @ translate
+                model = model @ view @ projection
+                
+                self.program["model"] = model
             except KeyError:
                 self.__modelview_enabled = False
 

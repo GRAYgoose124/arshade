@@ -20,8 +20,8 @@ void main()
     mat3 rot = mat3(in_pos.x*cos(time*in_pos.x), in_pos.y*sin(time*in_pos.y), 0., in_pos.x*sin(time*in_pos.y), in_pos.y*cos(time*in_pos.x), 0., 0., 0., 1.);
     vec3 new_pos = rot * in_pos;
 
-    mat3 rot2_in_pos_norm = mat3(in_pos.x*cos(time*in_pos.x), in_pos.y*sin(time*in_pos.y), 0., in_pos.x*sin(time*in_pos.y), in_pos.y*cos(time*in_pos.x), 0., 0., 0., 1.);
-    new_pos += rot2_in_pos_norm * in_pos;
+    mat3 rot2 = mat3(in_pos.x*cos(time*in_pos.x), in_pos.y*sin(time*in_pos.y), 0., in_pos.x*sin(time*in_pos.y), in_pos.y*cos(time*in_pos.x), 0., 0., 0., 1.);
+    new_pos += rot2 * in_pos;
     new_pos -= in_pos;
 
 
@@ -29,9 +29,10 @@ void main()
 
     // if in_id mod 3 == 0, then rotate the point/offset it
     if (mod(in_id, 3.) == 0.) {
-        gl_Position.x += sin(time*in_pos.x) * 0.1;
-        gl_Position.y += cos(time*in_pos.y) * 0.1;
+        gl_Position.x += new_pos.x*sin(in_pos.x) * 0.05;
+        gl_Position.y += new_pos.y*cos(in_pos.y) * 0.05;
     }
+
     gl_PointSize = point_size;
 
     // set output color directly from input

@@ -10,7 +10,7 @@ from math import cos, sin
 @dataclass
 class ProgramDefinition:
     vert_shader: str | None = field(default=None, kw_only=True)
-    description: tuple[str, list[str]] | None = field(default=None, kw_only=True)
+    description: tuple[str, list[str]] | None = field(default=("", []), kw_only=True)
     modelview_enabled: bool = False
     point_size: float = 1.0
     time_offset: float = 0.0
@@ -45,14 +45,16 @@ class ParallelSpiralOrbit(ProgramDefinition):
     time_offset: float = 900.0
     point_size: float = 4.0
     speed: float = 0.0001
+    rotation_speed: float = .1
     render_modes: tuple[int, int] = field(default=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS), kw_only=True)
-    modelview_enabled: bool = False
+    modelview_enabled: bool = True
     N: int = 10000
     
 
     def initial_data(self):
         """ This generates a set of points along a radius of a circle which are then rotated at different rates. """
         N = self.N
+        _step = 1 / N
         for i in range(N):
             angle = 0.0
             # outside point and inside point are fixed
@@ -60,11 +62,14 @@ class ParallelSpiralOrbit(ProgramDefinition):
             
             x = radius * cos(angle)
             y = radius * cos(angle)
-            z = 0.0
+            if self.modelview_enabled:
+                z = -_step * i * 2.
+            else:
+                z = 0.0
 
-            r = cos(i)
-            g = sin(i)
-            b = 0.25 + cos(i) * sin(i)
+            r = (i/N)*cos(i)
+            g = (i/N)*sin(i)
+            b = 0.25 + (i/N)*cos(i) * sin(i)
 
             yield i
 
@@ -101,7 +106,7 @@ class SinCosOrbit(ProgramDefinition):
             b = (cos(angle * 7.0) + 1.0) / 2.0
 
             yield i
-            
+
             yield x
             yield y
             yield z

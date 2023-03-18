@@ -11,7 +11,7 @@ Run the app wih the following:
 There are a number of views that can be chosen from the pause menu.
 ## Views
 ### Meta (unfinished)
-A view selector.
+A view selector. (Right now the pause menu plays this role)
 ### Wrigger (unfinished)
 Procedural model gen using self-organizing space-filling curves.
 ### Swarm (unfinished)

@@ -21,5 +21,6 @@ void main () {
     //     discard;
     // }
 
-    fragColor = col;
+
+    fragColor = col* 1.5;
 }
