@@ -164,9 +164,11 @@ class MeshView(ShaderView):
             return
         
         # update the model matrix
-        translate = Mat4.from_translation((0, 0, -2.5))
-        rotate = Mat4.from_rotation(self.time / 2, (1, .5, 0))
-        self.__program["model"] = rotate @ translate
+        model = Mat4.from_rotation(self.time / 2, (0, 1, 0)).translate((0, 0, -2.5))
+
+        projection = Mat4.orthogonal_projection(-1, 1, -1, 1, -1, 1)
+
+        self.__program["model"] =  model
 
     def on_show(self):
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)

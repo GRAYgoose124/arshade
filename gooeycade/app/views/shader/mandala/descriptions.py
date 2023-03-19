@@ -16,6 +16,7 @@ class ProgramDefinition:
     time_offset: float = 0.0
     speed: float = 1.0
     render_modes: tuple[int, int] = field(default=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS), kw_only=True)
+    target_speed: float = 1.0
     N: int = 1000
 
     def initial_data(self):
@@ -44,11 +45,11 @@ class ParallelSpiralOrbit(ProgramDefinition):
     description: tuple[str, list[str]] | None = field(default=("f 3f 3f", ["in_id", "in_pos", "in_col"]))
     time_offset: float = 900.0
     point_size: float = 4.0
-    speed: float = 0.0001
+    speed: float = 0.001
     rotation_speed: float = .1
     render_modes: tuple[int, int] = field(default=(pyglet.gl.GL_LINE_STRIP, pyglet.gl.GL_POINTS), kw_only=True)
     modelview_enabled: bool = True
-    N: int = 10000
+    N: int = 1000
     
 
     def initial_data(self):
@@ -67,9 +68,9 @@ class ParallelSpiralOrbit(ProgramDefinition):
             else:
                 z = 0.0
 
-            r = (i/N)*cos(i)
-            g = (i/N)*sin(i)
-            b = 0.25 + (i/N)*cos(i) * sin(i)
+            r = cos(i)
+            g = sin(i)
+            b = 0.25 + cos(i) * sin(i)
 
             yield i
 

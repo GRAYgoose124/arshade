@@ -1,6 +1,6 @@
 import arcade
 
-from gooeycade.app.views import PrimaryView, PauseView, SwarmView, MeshView, MandalaView
+from gooeycade.app.views import *
 
 
 class GooeyApp(arcade.Window):
@@ -16,6 +16,7 @@ class GooeyApp(arcade.Window):
             "mesh": MeshView(),
             "swarm": SwarmView(),
             "mandala": MandalaView(),
+            "wriggler": WrigglerView(),
             "pause": None,
         }
         self._views["pause"] = PauseView()

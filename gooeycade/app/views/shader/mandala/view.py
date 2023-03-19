@@ -9,10 +9,12 @@ from math import cos, sin, pi
 from array import array 
 from pathlib import Path
 
+from ..shader import ShaderView
+
 from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 
-class MandalaView(arcade.View):
+class MandalaView(ShaderView):
     def __init__(self):
         super().__init__()
         self.__start_time = 0
@@ -40,7 +42,8 @@ class MandalaView(arcade.View):
         self.vao = self.__build_mesh(description=descr)
 
         default_root = Path(__file__).parent / "shaders"
-        self.program = self.window.ctx.load_program(vertex_shader=default_root / descr.vert_shader, fragment_shader=default_root / "frag.glsl")
+        self.program = self.window.ctx.load_program(vertex_shader=default_root / descr.vert_shader, 
+                                                    fragment_shader=default_root / "frag.glsl")
        
         try:
             self.program['point_size'] = descr.point_size
@@ -63,7 +66,6 @@ class MandalaView(arcade.View):
 
     def __build_mesh(self, description: ProgramDefinition):
         # create a vertex buffer object (VBO) containing the positions of the points
-
         initial_data =  description.initial_data()
         buffer = self.window.ctx.buffer(data=array('f', initial_data))
 
@@ -80,19 +82,17 @@ class MandalaView(arcade.View):
                 pass
 
         if self.__modelview_enabled:
-            rotate = Mat4.from_rotation(sin(self.program['time'] * self.description.rotation_speed * (1/self.description.speed)) * 2 * pi, Vec3(-.2, .6, .2))
-            model = Mat4.from_translation(Vec3(0, 0, 1.)).scale(Vec3(1., 1., 1.))  @ rotate
-
-
-            view = Mat4().look_at(Vec3(0, 0, 1), Vec3(0, 0, 0), Vec3(1, 0, -1))
+            theta = sin(self.program['time'] * self.description.rotation_speed * (1/self.description.speed)) * 2 * pi
+            model = Mat4.from_rotation(theta*cos(self.program['time']), Vec3(-.1, 1., .5)).translate(Vec3(0, 0.2* theta, 0))#.scale(Vec3(2, 2, 2))
+            view = Mat4().look_at(Vec3(0, 0, -3), Vec3(0, 0, 0), Vec3(1, 1, 1))
 
             if self.__modelview_orthogonal:
-                projection = Mat4().orthogonal_projection(-1.5, 1.5, -1, 1, -5, 5)
+                projection = Mat4().orthogonal_projection(-2.5, 2.5, -2.5, 2.5, -5, 5)
             else:
-                projection = Mat4().perspective_projection(45, 1, 0.01, 100)
+                projection = Mat4().perspective_projection(45, -5, 5, 100)
 
             try:
-                model = model @ view @ projection
+                model = model @ view @ projection 
                 
                 self.program["model"] = model
             except KeyError:
