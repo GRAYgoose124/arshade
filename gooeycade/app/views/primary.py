@@ -1,9 +1,14 @@
 import arcade
 
 
+# TODO just needs to be a component
 class PrimaryView(arcade.View):
     def __init__(self):
         super().__init__()
+
+    # TODO base class
+    def setup(self):
+        pass
 
     def on_show(self):
         arcade.set_background_color(arcade.color.BLACK)

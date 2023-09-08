@@ -1,17 +1,6 @@
-from .primary import PrimaryView
+from .meta import MetaView
 from .pause import PauseView
-
-from .swarm.view import SwarmView
-from .meshviz.view import MeshView
-from .mandala.view import MandalaView
-from .wriggler.view import WrigglerView
+from .primary import PrimaryView
 from .shader import ShaderView
 
-__all__ = [
-    "PrimaryView",
-    "PauseView",
-    "SwarmView",
-    "MeshView",
-    "MandalaView",
-    "WrigglerView",
-]
+__all__ = ["MetaView", "PauseView", "PrimaryView", "ShaderView"]

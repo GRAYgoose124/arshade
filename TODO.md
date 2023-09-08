@@ -7,3 +7,4 @@
         - uniform block config
 - display texture data in meshviz
 - mesh selection in meshviz
+- click for cli usage/experiments

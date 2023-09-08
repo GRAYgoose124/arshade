@@ -9,14 +9,15 @@ from pyglet.math import Mat4
 from pathlib import Path
 
 from .mesh import MeshBuilder
-from ..shader import ShaderView
+from ...views.shader import ShaderView
 
 
 logger = logging.getLogger(__name__)
 
 
 class MeshView(ShaderView):
-    """ A view that renders a selected mesh. """
+    """A view that renders a selected mesh."""
+
     def __init__(self):
         super().__init__()
         self._time = 0
@@ -30,14 +31,12 @@ class MeshView(ShaderView):
 
         self._ui_manager = None
 
-        self.setup()
-
     def setup(self):
         self._time = 0
         self._start_time = time.time()
 
         # TODO GUI selector
-        self.__load_mesh_from_file("cube.obj", resize=.5)
+        self.__load_mesh_from_file("cube.obj", resize=0.5)
 
         # prepare graphics
         self.__program = self.__load_mesh_shader()
@@ -49,47 +48,49 @@ class MeshView(ShaderView):
 
     @property
     def time(self):
-        """ Returns the shader time."""
+        """Returns the shader time."""
         return self._time
-    
+
     @property
     def start_time(self):
-        """ Returns the shader start time."""
+        """Returns the shader start time."""
         return self._start_time
-    
+
     @property
     def mesh(self):
-        """ Returns the mesh to be rendered. """
+        """Returns the mesh to be rendered."""
         return self.__mesh
-    
+
     @property
     def mesh_path(self):
-        """ Returns the path to the mesh to be rendered. """
+        """Returns the path to the mesh to be rendered."""
         return self._mesh_path
-    
+
     @mesh_path.setter
     def mesh_path(self, path):
-        """ Sets the path to the mesh to be rendered and reloads the mesh. """
+        """Sets the path to the mesh to be rendered and reloads the mesh."""
         self.__load_mesh_from_file(path)
 
     @property
     def manager(self):
-        """ Returns the UI manager. """
+        """Returns the UI manager."""
         return self._ui_manager
-    
+
     def __load_mesh_from_file(self, path: Path | str, resize: float = 1.0):
-        """ Loads a mesh from a file. OBJ support only."""
+        """Loads a mesh from a file. OBJ support only."""
         self._mesh_path = Path(__file__).parent / "meshes" / path
 
         try:
-            self.__mesh = MeshBuilder(self.window).geometry_from_file(self._mesh_path, resize=resize)
+            self.__mesh = MeshBuilder(self.window).geometry_from_file(
+                self._mesh_path, resize=resize
+            )
         except (pyglet.model.codecs.ModelDecodeException, FileNotFoundError) as e:
             logger.warning(f"Failed to load mesh: {self.mesh_path}.")
             traceback.print_exc()
             self.__mesh = None
 
     def __load_mesh_shader(self, vert=None, frag=None, geom=None, shader_root=None):
-        """ Loads a shader program for rendering the mesh. """
+        """Loads a shader program for rendering the mesh."""
         default_root = Path(__file__).parent / "shaders"
         if shader_root is None:
             shader_root = default_root
@@ -110,32 +111,44 @@ class MeshView(ShaderView):
             gs = None
 
         program = self.window.ctx.load_program(
-            vertex_shader   = vs,
-            geometry_shader = gs,
-            fragment_shader = fs,
+            vertex_shader=vs,
+            geometry_shader=gs,
+            fragment_shader=fs,
         )
 
-        program["projection"] = Mat4.perspective_projection(self.window.aspect_ratio, 1.0, 10.0, 70)
+        program["projection"] = Mat4.perspective_projection(
+            self.window.aspect_ratio, 1.0, 10.0, 70
+        )
         return program
 
     def __build_render_fbo(self):
-        """ Builds the framebuffer object for off-screen rendering. """
+        """Builds the framebuffer object for off-screen rendering."""
         return self.window.ctx.framebuffer(
-            color_attachments=[self.window.ctx.texture((self.window.width, self.window.height), components=4)],
-            depth_attachment=self.window.ctx.depth_texture((self.window.width, self.window.height))
+            color_attachments=[
+                self.window.ctx.texture(
+                    (self.window.width, self.window.height), components=4
+                )
+            ],
+            depth_attachment=self.window.ctx.depth_texture(
+                (self.window.width, self.window.height)
+            ),
         )
-    
+
     def __build_mesh_selector(self):
-        """ Builds the Mesh Viewer's selection GUI. """
+        """Builds the Mesh Viewer's selection GUI."""
         menu = arcade.gui.UIBoxLayout()
 
-        label = arcade.gui.UITextArea(text="Mesh", font_size=24, text_color=arcade.color.WHITE)
-        menu.add(arcade.gui.UIAnchorWidget(child=label, anchor_x="left", anchor_y="top"))
+        label = arcade.gui.UITextArea(
+            text="Mesh", font_size=24, text_color=arcade.color.WHITE
+        )
+        menu.add(
+            arcade.gui.UIAnchorWidget(child=label, anchor_x="left", anchor_y="top")
+        )
 
         return menu
-    
+
     def __draw_mesh(self):
-        """ Draws the mesh to the screen. """
+        """Draws the mesh to the screen."""
         with self.__render_fbo:
             self.__render_fbo.clear()
 
@@ -154,7 +167,7 @@ class MeshView(ShaderView):
             pass
 
         self._ui_manager.draw()
-    
+
     def on_update(self, delta_time):
         self._time += delta_time
 
@@ -162,24 +175,24 @@ class MeshView(ShaderView):
             # TODO: Add mesh to a ui manager and disable it when no mesh is loaded.
             self.__load_mesh_from_file("cube.obj", resize=0.1)
             return
-        
+
         # update the model matrix
         model = Mat4.from_rotation(self.time / 2, (0, 1, 0)).translate((0, 0, -2.5))
 
         projection = Mat4.orthogonal_projection(-1, 1, -1, 1, -1, 1)
 
-        self.__program["model"] =  model
+        self.__program["model"] = model
 
     def on_show(self):
         self.window.ctx.enable_only(self.window.ctx.BLEND, self.window.ctx.DEPTH_TEST)
         self._ui_manager.enable()
 
         return super().on_show()
-    
+
     def on_hide_view(self):
         self._ui_manager.disable()
         return super().on_hide_view()
-    
+
     def on_resize(self, width: int, height: int):
         # rebuild the FBO with the new size
         self.__render_fbo = self.__build_render_fbo()

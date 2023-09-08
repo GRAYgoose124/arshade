@@ -8,8 +8,14 @@ Python and Arcade let you mess around, so I'm doing that.
 Run the app wih the following:
     gcade
 
-There are a number of views that can be chosen from the pause menu.
+# Components
+Components are the building block of an app. If a component has a view, then it can generally be selected from the pause menu. 
+
 ## Views
+There are a number of views that can be chosen from the pause menu.
+
+The Primary and Pause views are part of the core app. The rest are from components.
+
 ### Meta (unfinished)
 A view selector. (Right now the pause menu plays this role)
 ### Wrigger (unfinished)

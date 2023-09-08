@@ -2,7 +2,7 @@ import arcade
 import time
 
 from .swarm import Swarm
-from ..shader import ShaderView
+from ...views.shader import ShaderView
 
 
 class SwarmView(ShaderView):
@@ -17,7 +17,7 @@ class SwarmView(ShaderView):
     @property
     def swarm(self):
         return self._swarm
-    
+
     @swarm.setter
     def swarm(self, swarm):
         self._swarm = swarm
@@ -29,10 +29,9 @@ class SwarmView(ShaderView):
         self.swarm.render()
 
     def __unpause(self):
-        t = time.time() 
+        t = time.time()
         self.swarm.start_time += abs(t - self._pause_shader)
         super().__unpause()
-    
+
     def on_update(self, delta_time):
         self.swarm.on_update(delta_time)
-        

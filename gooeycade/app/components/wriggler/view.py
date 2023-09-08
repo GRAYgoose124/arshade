@@ -1,13 +1,11 @@
-import arcade 
+import arcade
 
-from ..shader import ShaderView
+from ...views.shader import ShaderView
+
 
 class WrigglerView(ShaderView):
     def __init__(self):
         super().__init__()
-
-
-        self.setup()
 
     def setup(self):
         pass
