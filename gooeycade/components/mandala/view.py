@@ -9,7 +9,7 @@ from math import cos, sin, pi
 from array import array
 from pathlib import Path
 
-from ...views.shader import ShaderView
+from ...app.views import ShaderView
 from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 

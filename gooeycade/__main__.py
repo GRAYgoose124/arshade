@@ -2,7 +2,7 @@ import arcade
 import logging
 
 from .app.core import GooeyApp
-from .app.components import *
+from .components import *
 
 
 def main():

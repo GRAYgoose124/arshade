@@ -9,7 +9,7 @@ from pyglet.math import Mat4
 from pathlib import Path
 
 from .mesh import MeshBuilder
-from ...views.shader import ShaderView
+from ...app.views import ShaderView
 
 
 logger = logging.getLogger(__name__)
