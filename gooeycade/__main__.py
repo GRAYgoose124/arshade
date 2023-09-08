@@ -1,8 +1,8 @@
 import arcade
 import logging
 
-from .app.core import GooeyApp
-from .components import *
+from gooeycade.app.core import GooeyApp
+from gooeycade.components import *
 
 
 def main():
