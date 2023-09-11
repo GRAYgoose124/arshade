@@ -9,7 +9,7 @@ from pyglet.math import Mat4
 from pathlib import Path
 
 from .mesh import MeshBuilder
-from ...app.views import ShaderView
+from ...app.shader import ShaderView
 
 
 logger = logging.getLogger(__name__)
@@ -196,3 +196,7 @@ class MeshView(ShaderView):
     def on_resize(self, width: int, height: int):
         # rebuild the FBO with the new size
         self.__render_fbo = self.__build_render_fbo()
+
+
+# Component registration
+ComponentView = MeshView

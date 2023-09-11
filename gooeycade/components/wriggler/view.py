@@ -1,6 +1,6 @@
 import arcade
 
-from ...app.views import ShaderView
+from ...app.shader import ShaderView
 
 
 class WrigglerView(ShaderView):

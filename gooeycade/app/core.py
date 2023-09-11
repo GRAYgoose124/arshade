@@ -3,20 +3,25 @@ import arcade
 import logging
 from functools import singledispatchmethod
 
-from gooeycade.app.views import *
 
 log = logging.getLogger(__name__)
 
+from .component import Component, ComponentManager
 
-class GooeyApp(arcade.Window):
-    def __init__(self):
-        super().__init__(1280, 720, "Gooey Cade", gl_version=(4, 3), resizable=True)
 
-        self._views = {"primary": PrimaryView(), "pause": PauseView()}
-        self._component_paths = {"primary": None, "pause": None}
+class GooeyApp(arcade.Window, ComponentManager):
+    def __init__(self, components=None):
+        arcade.Window.__init__(
+            self, 1280, 720, "Gooey Cade", gl_version=(4, 3), resizable=True
+        )
 
-        self._last_view = "primary"
-        self._default_view = "primary"
+        ComponentManager.__init__(self)
+
+        self._views = {}
+        self._default_view = None
+
+        if components is not None:
+            self.hotload_new_components(components.all, components.root)
 
     @property
     def views(self):
@@ -30,20 +35,15 @@ class GooeyApp(arcade.Window):
             view.setup()
 
         self.center_window()
-        self.show_view(self._default_view)
+        self.show_view(self._default_view or "primary")
 
         arcade.run()
 
     def show_view(self, view):
-        # if view not in self.views:
-        #     raise ValueError(f"View '{view}' does not exist.")
+        if view not in self.views:
+            raise ValueError(f"View '{view}' does not exist.")
 
-        # get the key of the current view
-        if self._current_view is not None and type(self._current_view) in [
-            type(x) for x in self._views.values()
-        ]:
-            key = {v: k for k, v in self._views.items()}[self._current_view]
-            self._last_view = key
+        self._last_view = self._current_view
 
         super().show_view(self.views[view])
 
@@ -64,30 +64,8 @@ class GooeyApp(arcade.Window):
 
         self._views[view.name] = view
 
-    def can_reload(self, view):
-        """Returns whether the view can be reloaded."""
-        return self._component_paths[view.name] is not None
-
-    def get_component_path(self, view):
-        """Returns the path to the component."""
-        return self._component_paths[view.name]
-
-    def discover_component_path(self, view, component_root: Path):
-        """Returns the path to the component."""
-        # get it by investigating the class's module
-        return component_root.parents[2] / view.__module__.replace(".", "/")
-
-    def load_component(self, component_path: Path):
-        """Loads a component from a path."""
-        import importlib.util
-
-        spec = importlib.util.spec_from_file_location(
-            component_path.name, component_path
-        )
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-
-        return module.ComponentView
+        if self._default_view is None:
+            self._default_view = view.name
 
     def load_components(self, component_paths: list[Path]):
         """Loads components from a list of paths."""
@@ -113,5 +91,4 @@ class GooeyApp(arcade.Window):
         reload them when needed."""
         for c in components:
             p = self.discover_component_path(c, component_root)
-            print(c, p)
             self.add_view(c(), reloadable_path=p)

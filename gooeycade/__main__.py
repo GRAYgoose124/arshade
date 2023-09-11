@@ -2,17 +2,14 @@ import arcade
 import logging
 
 from gooeycade.app.core import GooeyApp
+from gooeycade import components
 
 
 def main():
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("arcade").setLevel(logging.INFO)
 
-    app = GooeyApp()
-
-    from gooeycade import components
-
-    app.hotload_new_components(components.all, components.root)
+    app = GooeyApp(components)
 
     app.start()
 

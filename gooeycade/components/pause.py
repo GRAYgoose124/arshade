@@ -1,7 +1,7 @@
 import arcade
 import arcade.gui
 
-from ..component import Component
+from ..app.component import Component
 
 
 class PauseView(Component):
@@ -181,15 +181,14 @@ class PauseView(Component):
 
     # UI callbacks
     def __select_view(self, view_name):
-        self._selected_view = view_name or None
+        self._selected_view = view_name or "pause"
+        print(f"{self._selected_view=}")
         self.__resume_game(None)
 
     def __resume_game(self, event):
         self.uimanager.remove(self._settings_menu)
 
-        self.window.show_view(
-            self._selected_view or self.window._last_view or "primary"
-        )
+        self.window.show_view(self._selected_view)
 
     def __exit_game_dialog(self, button_text):
         if button_text == "Ok":

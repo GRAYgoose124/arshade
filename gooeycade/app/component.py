@@ -15,7 +15,7 @@ class Component(arcade.View):
 
     @property
     def name(self):
-        pass
+        return self.__class__.__name__.replace("View", "").lower()
 
     @property
     def path(self):
@@ -23,4 +23,30 @@ class Component(arcade.View):
 
 
 class ComponentManager:
-    pass
+    def __init__(self):
+        self._component_paths = {}
+
+    def can_reload(self, view):
+        """Returns whether the view can be reloaded."""
+        return self._component_paths[view.name] is not None
+
+    def get_component_path(self, view):
+        """Returns the path to the component."""
+        return self._component_paths[view.name]
+
+    def discover_component_path(self, view, component_root: Path):
+        """Returns the path to the component."""
+        # get it by investigating the class's module
+        return component_root.parents[2] / view.__module__.replace(".", "/")
+
+    def load_component(self, component_path: Path):
+        """Loads a component from a path."""
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            component_path.name, component_path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        return module.ComponentView

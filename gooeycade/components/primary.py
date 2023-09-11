@@ -1,6 +1,6 @@
 import arcade
 
-from ..component import Component
+from ..app.component import Component
 
 
 # TODO just needs to be a component

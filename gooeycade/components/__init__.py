@@ -2,9 +2,18 @@ from .mandala.view import MandalaView
 from .meshviz.view import MeshView
 from .swarm.view import SwarmView
 from .wriggler.view import WrigglerView
+from .pause import PauseView
+from .primary import PrimaryView
 
 
-all = [MandalaView, MeshView, SwarmView, WrigglerView]
+all = [
+    MandalaView,
+    MeshView,
+    SwarmView,
+    WrigglerView,
+    PauseView,
+    PrimaryView,
+]
 
 
 def __root__(path):

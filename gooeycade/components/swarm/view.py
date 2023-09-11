@@ -2,7 +2,7 @@ import arcade
 import time
 
 from .swarm import Swarm
-from ...app.views import ShaderView
+from ...app.shader import ShaderView
 
 
 class SwarmView(ShaderView):
