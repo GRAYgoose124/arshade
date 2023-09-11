@@ -1,7 +1,9 @@
 import arcade
 
+from ..component import Component
 
-class MetaView(arcade.View):
+
+class MetaView(Component):
     def __init__(self):
         super().__init__()
 

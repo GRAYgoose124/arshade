@@ -2,7 +2,6 @@ import arcade
 import logging
 
 from gooeycade.app.core import GooeyApp
-from gooeycade.components import *
 
 
 def main():
@@ -11,14 +10,10 @@ def main():
 
     app = GooeyApp()
 
-    app.add_views(
-        {
-            "mesh": MeshView(),
-            "swarm": SwarmView(),
-            "mandala": MandalaView(),
-            "wriggler": WrigglerView(),
-        }
-    )
+    from gooeycade import components
+
+    app.hotload_new_components(components.all, components.root)
+
     app.start()
 
 

@@ -1,8 +1,10 @@
 import arcade
 import arcade.gui
 
+from ..component import Component
 
-class PauseView(arcade.View):
+
+class PauseView(Component):
     def __init__(self):
         super().__init__()
 

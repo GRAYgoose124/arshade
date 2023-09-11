@@ -3,12 +3,18 @@ import arcade
 import arcade.gl
 import time
 
+from ..component import Component
 
-class ShaderView(arcade.View):
+
+class ShaderView(Component):
     def __init__(self):
         super().__init__()
         self._hidden_pause = False
         self._pause_shader = False
+
+    @property
+    def name(self):
+        return self.__class__.__name__.replace("View", "")
 
     def setup(self):
         pass

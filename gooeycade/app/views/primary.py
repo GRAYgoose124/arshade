@@ -1,8 +1,10 @@
 import arcade
 
+from ..component import Component
+
 
 # TODO just needs to be a component
-class PrimaryView(arcade.View):
+class PrimaryView(Component):
     def __init__(self):
         super().__init__()
 
