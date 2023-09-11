@@ -1,8 +1,9 @@
+from abc import ABCMeta
 import arcade
 from pathlib import Path
 
 
-class Component(arcade.View):
+class Component(arcade.View, metaclass=ABCMeta):
     """Unused - documentation only."""
 
     def __init__(self):

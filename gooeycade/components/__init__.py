@@ -5,7 +5,12 @@ from .wriggler.view import WrigglerView
 from .pause import PauseView
 from .primary import PrimaryView
 
-
+#### Start of Component Interface ####
+# Provides a standard interface for hotloading app components.
+#
+# app = GooeyApp(components: {all: list[Component], root: str})
+#
+#
 all = [
     MandalaView,
     MeshView,
@@ -14,10 +19,12 @@ all = [
     PauseView,
     PrimaryView,
 ]
+root = None
+#### End of Component Interface ####
 
 
 def __root__(path):
-    """Returns the root path."""
+    """Sets the root path w/o importing pathlib to namespace."""
     global root
     import pathlib
 
