@@ -1,7 +1,7 @@
 import arcade
 import arcade.gui
 
-from ..app.component import Component
+from gooeycade.app.component import Component
 
 
 class PauseView(Component):
@@ -14,7 +14,7 @@ class PauseView(Component):
         self._view_select_menu = None
         self._exit_dialog_handle = None
 
-        self._selected_view = None
+        self._selected_view = "primary"
 
     def setup(self):
         self.uimanager = arcade.gui.UIManager()
@@ -24,7 +24,7 @@ class PauseView(Component):
         self._view_select_menu = self.__build_view_select_menu()
         self._exit_dialog_handle = None
 
-        self._selected_view = None
+        self._selected_view = "primary"
 
         self.uimanager.add(
             arcade.gui.UIAnchorWidget(
@@ -175,8 +175,9 @@ class PauseView(Component):
                 continue
 
             view_button = arcade.gui.UIFlatButton(text=view_name, width=200, height=50)
-            view_button.on_click = lambda _, view_name=view_name: self.__select_view(
-                view_name
+            view_button.on_click = (
+                lambda _, view_name=view_name: self.__select_view(view_name)
+                or self.window._last_view
             )
             menu.add(
                 arcade.gui.UIAnchorWidget(
