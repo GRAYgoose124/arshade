@@ -11,7 +11,7 @@ def main():
 
     app = GooeyApp(components)
 
-    app.start()
+    app.start(default_view="primary")
 
 
 if __name__ == "__main__":

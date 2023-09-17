@@ -11,21 +11,25 @@ import time
 
 @dataclass
 class AgentShader:
-    """ Agent shader """
+    """Agent shader"""
+
     buffer: arcade.gl.Buffer
     vao: arcade.gl.Geometry
 
 
 @dataclass
 class Swarm:
-    """ Swarm of particles """
-    AGENT_COUNT: int = field(default=10000, init=False)
+    """Swarm of particles"""
+
+    AGENT_COUNT: int = field(default=50000, init=False)
 
     window: arcade.Window
 
     program: arcade.gl.Program = field(default=None, init=False)
     agent_program: arcade.gl.Program = field(default=None, init=False)
-    group_size: namedtuple = field(default=namedtuple("ComputeGroup", ['x', 'y', 'z'])(x=256, y=1, z=1), init=False)
+    group_size: namedtuple = field(
+        default=namedtuple("ComputeGroup", ["x", "y", "z"])(x=256, y=1, z=1), init=False
+    )
 
     # TODO: Use framebuffer instead of manual flipping.
     ssbo1: arcade.gl.Buffer = field(default=None, init=False)
@@ -38,34 +42,40 @@ class Swarm:
     def __post_init__(self):
         initial_data = self._gen_initial_data(500, 500)
 
-        self.ssbo1 = self.window.ctx.buffer(data=array('f', initial_data))
+        self.ssbo1 = self.window.ctx.buffer(data=array("f", initial_data))
         self.ssbo2 = self.window.ctx.buffer(reserve=self.ssbo1.size)
-        
+
         buffer_format = "4f 4x4 4f"
         attributes = ["in_vertex", "in_color"]
         self.vao1 = self.window.ctx.geometry(
             [arcade.gl.BufferDescription(self.ssbo1, buffer_format, attributes)],
-            mode=self.window.ctx.TRIANGLES
+            mode=self.window.ctx.TRIANGLES,
         )
         self.vao2 = self.window.ctx.geometry(
             [arcade.gl.BufferDescription(self.ssbo2, buffer_format, attributes)],
-            mode=self.window.ctx.TRIANGLES
+            mode=self.window.ctx.TRIANGLES,
         )
 
         shader_root = Path(__file__).parent / "shaders"
         self.program = self.window.ctx.load_program(
-            geometry_shader= shader_root / "geom.glsl",
-            vertex_shader= shader_root / "vert.glsl",
-            fragment_shader= shader_root / "frag.glsl",
+            geometry_shader=shader_root / "geom.glsl",
+            vertex_shader=shader_root / "vert.glsl",
+            fragment_shader=shader_root / "frag.glsl",
         )
 
         compute_shader_source = (shader_root / "compute.glsl").read_text()
-        compute_shader_source = compute_shader_source.replace("COMPUTE_SIZE_X", str(Swarm.group_size.x))
-        compute_shader_source = compute_shader_source.replace("COMPUTE_SIZE_Y", str(Swarm.group_size.y))
-        self.agent_program = self.window.ctx.compute_shader(source=compute_shader_source)
+        compute_shader_source = compute_shader_source.replace(
+            "COMPUTE_SIZE_X", str(Swarm.group_size.x)
+        )
+        compute_shader_source = compute_shader_source.replace(
+            "COMPUTE_SIZE_Y", str(Swarm.group_size.y)
+        )
+        self.agent_program = self.window.ctx.compute_shader(
+            source=compute_shader_source
+        )
 
     def _gen_initial_data(self, initial_x, initial_y):
-        """ Generate data for each particle """
+        """Generate data for each particle"""
         radius = 10.0
         for i in range(Swarm.AGENT_COUNT):
             # Position/radius
@@ -91,7 +101,7 @@ class Swarm:
         self.ssbo1.bind_to_storage_buffer(binding=0)
         self.ssbo2.bind_to_storage_buffer(binding=1)
 
-        # uniforms 
+        # uniforms
         # self.compute_shader["screen_size"] = self.get_size()
         # self.compute_shader["force"] = force
         # self.compute_shader["time"] = time.time() - self.start_time
@@ -109,4 +119,4 @@ class Swarm:
             self.program["time"] = time.time() - self.start_time
         except KeyError:
             # glsl optimizes out unused uniforms :x
-            pass    
+            pass

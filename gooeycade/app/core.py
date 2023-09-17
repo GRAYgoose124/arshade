@@ -27,7 +27,12 @@ class GooeyApp(arcade.Window, ComponentManager):
     def views(self):
         return self._views
 
-    def start(self):
+    def start(self, default_view=None):
+        if default_view is not None:
+            if default_view not in self.views:
+                raise ValueError(f"View '{default_view}' does not exist.")
+
+            self._default_view = default_view
         log.info(
             "Starting Gooey Cade\nViews: %s", [v.name for v in self.views.values()]
         )
@@ -35,7 +40,7 @@ class GooeyApp(arcade.Window, ComponentManager):
             view.setup()
 
         self.center_window()
-        self.show_view(self._default_view or "primary")
+        self.show_view(self._default_view)
 
         arcade.run()
 

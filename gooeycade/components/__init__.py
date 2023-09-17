@@ -2,17 +2,22 @@ from .mandala.view import MandalaView
 from .meshviz.view import MeshView
 from .swarm.view import SwarmView
 from .wriggler.view import WrigglerView
+from .tiler.view import TilerView
+
 from .pause import PauseView
 from .primary import PrimaryView
 
 
 all = [
+    # Do not change these unless you know what you're doing:
+    PauseView,
+    PrimaryView,
+    # Add your views here:
     MandalaView,
     MeshView,
     SwarmView,
     WrigglerView,
-    PauseView,
-    PrimaryView,
+    TilerView,
 ]
 
 

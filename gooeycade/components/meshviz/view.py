@@ -36,7 +36,7 @@ class MeshView(ShaderView):
         self._start_time = time.time()
 
         # TODO GUI selector
-        self.__load_mesh_from_file("monkey.obj", resize=1.0)
+        self.__load_mesh_from_file("cube.obj", resize=1.0)
 
         # prepare graphics
         self.__program = self.__load_mesh_shader()
