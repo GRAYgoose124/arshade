@@ -1,13 +1,28 @@
 # About
-Python and Arcade let you mess around, so I'm doing that.
+A simple app for various GL views in Python using Arcade.
 
 # Installation
-    poetry install
+```bash
+git clone git@github.com:GRAYgoose124/arshade.git
+cd arshade
+```
+then:
+```bash
+poetry install
+```
+or 
+```bash
+pip install ./arshade
+```
+
+> Tip: use pip install -e to install in editable mode. This will allow you to make changes to the code and have them reflected in the installed package.
 
 # Usage
 Run the app wih the following:
-    gcade
-
+```bash
+gcade
+```
+    
 # Components
 Components are the building block of an app. If a component has a view, then it can generally be selected from the pause menu. 
 
