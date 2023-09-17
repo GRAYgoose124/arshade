@@ -1,0 +1,5 @@
+- [ ] Components
+  - [x]  hotloading
+    - [ ] automatic
+    - [ ] yaml configuration 
+  - [x]  basic shader view 

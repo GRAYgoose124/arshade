@@ -8,5 +8,8 @@
 - display texture data in meshviz
 - mesh selection in meshviz
 - click for cli usage/experiments
-- [x] component hotloading
-  - [ ] automatic
+- [ ] Components
+  - [x]  hotloading
+    - [ ] automatic
+    - [ ] yaml configuration 
+  - [x]  basic shader view 

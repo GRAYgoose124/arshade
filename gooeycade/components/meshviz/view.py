@@ -36,7 +36,7 @@ class MeshView(ShaderViewComponent):
         self._start_time = time.time()
 
         # TODO GUI selector
-        self.__load_mesh_from_file("cube.obj", resize=1.0)
+        self.__load_mesh_from_file("toRus.obj", resize=1.0)
 
         # prepare graphics
         self.__program = self.__load_mesh_shader()
@@ -78,6 +78,7 @@ class MeshView(ShaderViewComponent):
 
     def __load_mesh_from_file(self, path: Path | str, resize: float = 1.0):
         """Loads a mesh from a file. OBJ support only."""
+        # TODO: better root control
         self._mesh_path = Path(__file__).parent / "meshes" / path
 
         try:
