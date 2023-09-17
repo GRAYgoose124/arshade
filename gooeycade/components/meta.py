@@ -1,6 +1,6 @@
 import arcade
 
-from ..component import Component
+from gooeycade.app.component import Component
 
 
 class MetaView(Component):
@@ -16,3 +16,6 @@ class MetaView(Component):
 
     def on_key_press(self, key, modifiers):
         pass
+
+
+ComponentView = MetaView

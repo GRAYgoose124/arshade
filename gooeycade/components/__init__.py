@@ -7,11 +7,10 @@ from .tiler.view import TilerView
 from .pause import PauseView
 from .primary import PrimaryView
 
+# Do not change these unless you know what you're doing:
+core = [PauseView, PrimaryView]
 
-all = [
-    # Do not change these unless you know what you're doing:
-    PauseView,
-    PrimaryView,
+all = core + [
     # Add your views here:
     MandalaView,
     MeshView,
@@ -22,20 +21,18 @@ all = [
 
 
 def __root__(path):
-    """Returns the root path."""
+    """Returns the components root path."""
     global root
-    import pathlib
+    import sys, pathlib
 
     root = pathlib.Path(path)
+
+    # append app to path so components can import relatively - dynamically.
+    # This is used
+    sys.path.append(str(root.parent))
 
 
 __root__(__file__)
 
 
 __all__ = [str(c.__name__) for c in all]
-
-
-# append app to path so components can import relatively dynamically
-import sys
-
-sys.path.append(str(root.parent))

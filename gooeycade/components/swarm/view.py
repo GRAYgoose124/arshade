@@ -1,11 +1,12 @@
 import arcade
 import time
 
+from gooeycade.app.shader import ShaderViewComponent
+
 from .swarm import Swarm
-from ...app.shader import ShaderView
 
 
-class SwarmView(ShaderView):
+class SwarmView(ShaderViewComponent):
     def __init__(self):
         super().__init__()
 
@@ -35,3 +36,6 @@ class SwarmView(ShaderView):
 
     def on_update(self, delta_time):
         self.swarm.on_update(delta_time)
+
+
+ComponentView = SwarmView

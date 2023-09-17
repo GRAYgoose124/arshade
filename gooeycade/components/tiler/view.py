@@ -1,9 +1,9 @@
 import arcade
 
-from ...app.shader import ShaderView
+from gooeycade.app.shader import ShaderViewComponent
 
 
-class TilerView(ShaderView):
+class TilerView(ShaderViewComponent):
     def __init__(self):
         super().__init__()
 
@@ -13,3 +13,6 @@ class TilerView(ShaderView):
     def on_draw(self):
         arcade.start_render()
         pass
+
+
+ComponentView = TilerView

@@ -9,12 +9,12 @@ from math import cos, sin, pi
 from array import array
 from pathlib import Path
 
-from gooeycade.app.shader import ShaderView
+from gooeycade.app.shader import ShaderViewComponent
 
 from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 
-class MandalaView(ShaderView):
+class MandalaView(ShaderViewComponent):
     def __init__(self):
         super().__init__()
         self.__start_time = 0

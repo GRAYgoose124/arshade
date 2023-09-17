@@ -1,9 +1,9 @@
 import arcade
 
-from ...app.shader import ShaderView
+from gooeycade.app.shader import ShaderViewComponent
 
 
-class WrigglerView(ShaderView):
+class WrigglerView(ShaderViewComponent):
     def __init__(self):
         super().__init__()
 
@@ -13,3 +13,6 @@ class WrigglerView(ShaderView):
     def on_draw(self):
         arcade.start_render()
         pass
+
+
+ComponentView = WrigglerView

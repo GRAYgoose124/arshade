@@ -204,3 +204,6 @@ class PauseView(Component):
     def __exit_game_dialog(self, button_text):
         if button_text == "Ok":
             arcade.close_window()
+
+
+ComponentView = PauseView

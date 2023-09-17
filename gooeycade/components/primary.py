@@ -1,6 +1,6 @@
 import arcade
 
-from ..app.component import Component
+from gooeycade.app.component import Component
 
 
 # TODO just needs to be a component
@@ -21,3 +21,6 @@ class PrimaryView(Component):
 
     def on_key_press(self, key, modifiers):
         pass
+
+
+ComponentView = PrimaryView

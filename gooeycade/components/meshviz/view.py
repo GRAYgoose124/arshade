@@ -8,14 +8,14 @@ import logging
 from pyglet.math import Mat4
 from pathlib import Path
 
-from .mesh import MeshBuilder
-from ...app.shader import ShaderView
+from gooeycade.app.shader import ShaderViewComponent
 
+from .mesh import MeshBuilder
 
 logger = logging.getLogger(__name__)
 
 
-class MeshView(ShaderView):
+class MeshView(ShaderViewComponent):
     """A view that renders a selected mesh."""
 
     def __init__(self):

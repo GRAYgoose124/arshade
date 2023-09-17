@@ -6,7 +6,7 @@ import time
 from .component import Component
 
 
-class ShaderView(Component):
+class ShaderViewComponent(Component):
     def __init__(self):
         super().__init__()
         self._hidden_pause = False
