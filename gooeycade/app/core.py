@@ -19,6 +19,7 @@ class GooeyApp(arcade.Window, ComponentManager):
 
         self._views = {}
         self._default_view = None
+        self._last_view = None
 
         if components is not None:
             self.hotload_new_components(components.all, components.root)
@@ -26,6 +27,10 @@ class GooeyApp(arcade.Window, ComponentManager):
     @property
     def views(self):
         return self._views
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            self.show_view("pause")
 
     def start(self, default_view=None):
         if default_view is not None:
@@ -48,7 +53,7 @@ class GooeyApp(arcade.Window, ComponentManager):
         if view not in self.views:
             raise ValueError(f"View '{view}' does not exist.")
 
-        self._last_view = self._current_view
+        self._last_view = self._current_view or self._default_view or view
 
         super().show_view(self.views[view])
 
@@ -58,36 +63,40 @@ class GooeyApp(arcade.Window, ComponentManager):
 
         self._default_view = view
 
-    def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            self.show_view("pause")
-
     def add_view(self, view, reloadable_path=None):
         """Adds a view to the app."""
         if reloadable_path is not None:
-            self._component_paths[view.name] = reloadable_path
+            self.add_component_path(view, reloadable_path)
+
+        if view.name in self._views:
+            log.warning("View '%s' already exists, overwriting.", view.name)
+            del self._views[view.name]
+            # force GC
 
         self._views[view.name] = view
 
         if self._default_view is None:
             self._default_view = view.name
 
-    def load_components(self, component_paths: list[Path]):
-        """Loads components from a list of paths."""
-        for p in component_paths:
-            self.add_view(self.load_component(p), reloadable_path=p)
-
-    def update_view(self, view):
+    def update_view(self, vname):
         """Updates a view."""
-        if self.can_reload(view):
-            p = self.get_component_path(view)
-            self.add_view(self.load_component(p), reloadable_path=p)
-        self.views[view].setup()
+        self.show_view("pause")
+        if self.can_reload(vname):
+            p = self.get_component_path(vname)
+            log.info("Reloading view '%s' from %s", vname, p)
+            self.add_view(self.load_component(p)(), reloadable_path=p)
+            log.info("Updated view '%s'", self.views[vname])
+            self.views[vname].setup()
 
     def update_views(self):
         """Updates the views."""
         for view in self.views.values():
             self.update_view(view)
+
+    def load_components(self, component_paths: list[Path]):
+        """Loads components from a list of paths."""
+        for p in component_paths:
+            self.add_view(self.load_component(p)(), reloadable_path=p)
 
     def hotload_new_components(
         self, components: list[arcade.View], component_root: Path

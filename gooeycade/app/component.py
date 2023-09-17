@@ -54,22 +54,43 @@ class ComponentManager:
 
         return self._component_paths[name]
 
+    def add_component_path(self, view, path):
+        """Adds a component path."""
+        if isinstance(view, Component):
+            name = view.name
+        elif isinstance(view, str):
+            name = view
+        else:
+            raise TypeError(f"View must be a Component or a string, not {type(view)}.")
+
+        self._component_paths[name] = path
+
     def discover_component_path(self, view, component_root: Path):
         """Returns the path to the component."""
         # get it by investigating the class's module
         cpath = component_root.parents[2] / view.__module__.replace(".", "/")
+        cpath = cpath.with_suffix(".py")
         log.debug("Discovered component path: %s", cpath)
         if cpath.exists():
             return cpath
         else:
+            log.warning(
+                "Could not find actual component at discovered component path for %s",
+                view,
+            )
             return None
 
     def load_component(self, component_path: Path):
         """Loads a component from a path."""
-        log.debug("Loading component from %s", component_path)
-        spec = importlib.util.spec_from_file_location(
-            component_path.name, component_path.parent
+        log.debug(
+            "Loading %s component from %s", component_path.parent.stem, component_path
         )
+
+        spec = importlib.util.spec_from_file_location(
+            f"{component_path.parent.stem}.{component_path.stem}",
+            component_path,
+        )
+
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 

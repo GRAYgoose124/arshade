@@ -1,10 +1,12 @@
 - Move self.program from the views in views.shader to ShaderView and override in subclasses.
 - mandala.description is terribly lazy
-    - mandala is a mess
-        - we need to group up a description + it's generator and shader in one config file
-        - MVP needs to be functionalized and configurable
-        - attributes need proper properties
-        - uniform block config
+  - mandala is a mess
+    - we need to group up a description + it's generator and shader in one config file
+    - MVP needs to be functionalized and configurable
+    - attributes need proper properties
+    - uniform block config
 - display texture data in meshviz
 - mesh selection in meshviz
 - click for cli usage/experiments
+- [x] component hotloading
+  - [ ] automatic

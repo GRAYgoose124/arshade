@@ -33,3 +33,9 @@ __root__(__file__)
 
 
 __all__ = [str(c.__name__) for c in all]
+
+
+# append app to path so components can import relatively dynamically
+import sys
+
+sys.path.append(str(root.parent))

@@ -9,7 +9,8 @@ from math import cos, sin, pi
 from array import array
 from pathlib import Path
 
-from ...app.shader import ShaderView
+from gooeycade.app.shader import ShaderView
+
 from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 
 
@@ -31,6 +32,7 @@ class MandalaView(ShaderView):
         # TODO: This should be configurable, but initial_data isn't properly set when rebuilt from json (because it's tied to the subclass :X)
         # descr = ProgramDefinition.from_json(Path(__file__).parent / "configs" / "parallel.json")
         descr = ParallelSpiralOrbit()
+        # descr = SinCosOrbit()
 
         self.description = descr
         self.__start_time += descr.time_offset
@@ -127,3 +129,6 @@ class MandalaView(ShaderView):
 
     def on_key_press(self, key, modifiers):
         pass
+
+
+ComponentView = MandalaView
