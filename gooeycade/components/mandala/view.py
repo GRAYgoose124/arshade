@@ -30,7 +30,7 @@ class MandalaView(ShaderView):
 
         # TODO: This should be configurable, but initial_data isn't properly set when rebuilt from json (because it's tied to the subclass :X)
         # descr = ProgramDefinition.from_json(Path(__file__).parent / "configs" / "parallel.json")
-        descr = SinCosOrbit()
+        descr = ParallelSpiralOrbit()
 
         self.description = descr
         self.__start_time += descr.time_offset

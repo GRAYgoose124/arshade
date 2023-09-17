@@ -1,5 +1,11 @@
 import arcade
+import logging
+import importlib.util
+
 from pathlib import Path
+
+
+log = logging.getLogger(__name__)
 
 
 class Component(arcade.View):
@@ -28,23 +34,41 @@ class ComponentManager:
 
     def can_reload(self, view):
         """Returns whether the view can be reloaded."""
-        return self._component_paths[view.name] is not None
+        if isinstance(view, Component):
+            name = view.name
+        elif isinstance(view, str):
+            name = view
+        else:
+            raise TypeError(f"View must be a Component or a string, not {type(view)}.")
+
+        return name in self._component_paths and self._component_paths[name] is not None
 
     def get_component_path(self, view):
         """Returns the path to the component."""
-        return self._component_paths[view.name]
+        if isinstance(view, Component):
+            name = view.name
+        elif isinstance(view, str):
+            name = view
+        else:
+            raise TypeError(f"View must be a Component or a string, not {type(view)}.")
+
+        return self._component_paths[name]
 
     def discover_component_path(self, view, component_root: Path):
         """Returns the path to the component."""
         # get it by investigating the class's module
-        return component_root.parents[2] / view.__module__.replace(".", "/")
+        cpath = component_root.parents[2] / view.__module__.replace(".", "/")
+        log.debug("Discovered component path: %s", cpath)
+        if cpath.exists():
+            return cpath
+        else:
+            return None
 
     def load_component(self, component_path: Path):
         """Loads a component from a path."""
-        import importlib.util
-
+        log.debug("Loading component from %s", component_path)
         spec = importlib.util.spec_from_file_location(
-            component_path.name, component_path
+            component_path.name, component_path.parent
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

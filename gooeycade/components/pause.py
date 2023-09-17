@@ -91,6 +91,16 @@ class PauseView(Component):
             child=views_button, anchor_x="center", anchor_y="center", align_y=-110
         )
 
+        reload_button = arcade.gui.UIFlatButton(text="↻", width=50, height=50)
+        reload_button.on_click = lambda _: self.window.update_view(self._selected_view)
+        reload_button = arcade.gui.UIAnchorWidget(
+            child=reload_button,
+            anchor_x="right",
+            anchor_y="center",
+            align_y=-110,
+            align_x=55,
+        )
+
         quit_button = arcade.gui.UIFlatButton(text="Quit", width=200, height=50)
         quit_button.on_click = lambda _: arcade.close_window()
         quit_button = arcade.gui.UIAnchorWidget(
@@ -100,6 +110,7 @@ class PauseView(Component):
         pause_buttons.add(resume_button)
         pause_buttons.add(settings_button)
         pause_buttons.add(views_button)
+        pause_buttons.add(reload_button)
         pause_buttons.add(quit_button)
 
         # build screen

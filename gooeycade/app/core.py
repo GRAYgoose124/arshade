@@ -82,7 +82,7 @@ class GooeyApp(arcade.Window, ComponentManager):
         if self.can_reload(view):
             p = self.get_component_path(view)
             self.add_view(self.load_component(p), reloadable_path=p)
-        view.setup()
+        self.views[view].setup()
 
     def update_views(self):
         """Updates the views."""
@@ -97,3 +97,5 @@ class GooeyApp(arcade.Window, ComponentManager):
         for c in components:
             p = self.discover_component_path(c, component_root)
             self.add_view(c(), reloadable_path=p)
+
+        log.debug("Loaded components: %s", self._component_paths)
