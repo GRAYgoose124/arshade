@@ -80,9 +80,10 @@ class MandalaView(ShaderViewComponent):
     def on_update(self, delta_time: float):
         if self.__program_has_time_uniform:
             try:
+                t = time.time() - self.__start_time
                 self.program["time"] = (
-                    time.time() - self.__start_time
-                ) * self.description.speed
+                    t * self.description.speed * (1.0 * abs(sin(t * 0.01)))
+                )
             except KeyError:
                 pass
 
