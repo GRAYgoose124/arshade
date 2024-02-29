@@ -47,7 +47,8 @@ class MeshView(ShaderViewComponent):
         self.__program = self.__load_mesh_shader()
         self.__render_fbo = self.__build_render_fbo()
 
-        self.__gen_octree(vertices)
+        if vertices is not None:
+            self.__gen_octree(vertices)
 
         # UI
         self._ui_manager = arcade.gui.UIManager(self.window)
@@ -125,7 +126,8 @@ class MeshView(ShaderViewComponent):
         except (pyglet.model.codecs.ModelDecodeException, FileNotFoundError) as e:
             logger.warning(f"Failed to load mesh: {self.mesh_path}.")
             traceback.print_exc()
-            self.__mesh = None
+            self.__mesh = "BAD_MESH_FILE"
+            vertices = None
 
         return vertices
 

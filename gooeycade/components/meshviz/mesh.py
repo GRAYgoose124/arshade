@@ -18,7 +18,7 @@ class MeshBuilder:
         # m = pyglet.model.load(str(path))
         try:
             m = pyglet.model.codecs.obj.parse_obj_file(str(path))[0]
-        except IndexError:
+        except (IndexError, ValueError):
             raise ValueError(
                 f"Could not load mesh from {path} - make sure it has a material!"
             )
