@@ -10,7 +10,7 @@ from pyglet.math import Mat4
 from pathlib import Path
 from collections import namedtuple
 
-from gooeycade.app.shader import ShaderViewComponent
+from gooeycade.app.component import ShaderViewComponent
 
 from .mesh import MeshBuilder
 

@@ -9,7 +9,7 @@ from math import cos, sin, pi
 from array import array
 from pathlib import Path
 
-from gooeycade.app.shader import ShaderViewComponent
+from gooeycade.app.component import ShaderViewComponent
 
 from .descriptions import ProgramDefinition, ParallelSpiralOrbit, SinCosOrbit
 

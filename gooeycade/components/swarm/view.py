@@ -1,7 +1,7 @@
 import arcade
 import time
 
-from gooeycade.app.shader import ShaderViewComponent
+from gooeycade.app.component import ShaderViewComponent
 
 from .swarm import Swarm
 

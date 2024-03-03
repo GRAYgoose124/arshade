@@ -92,7 +92,7 @@ class PauseView(Component):
         )
 
         reload_button = arcade.gui.UIFlatButton(text="↻", width=50, height=50)
-        reload_button.on_click = lambda _: self.window.update_view(self._selected_view)
+        reload_button.on_click = lambda _: self.window.reload_view(self._selected_view)
         reload_button = arcade.gui.UIAnchorWidget(
             child=reload_button,
             anchor_x="right",
