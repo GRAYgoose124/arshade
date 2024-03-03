@@ -15,6 +15,10 @@ class Component(arcade.View):
         super().__init__()
         self._view_cls = None
 
+    def setup(self):
+        """Called when the component is initialized."""
+        pass
+
     def get_component_spec(self):
         # get the path of the view class
         view_path = Path(self._view_cls.__module__.replace(".", "/"))
@@ -65,7 +69,8 @@ class ComponentManager:
 
         self._component_paths[name] = path
 
-    def discover_component_path(self, view, component_root: Path):
+    @staticmethod
+    def discover_component_path(view, component_root: Path):
         """Returns the path to the component."""
         # get it by investigating the class's module
         cpath = component_root.parents[2] / view.__module__.replace(".", "/")
@@ -80,7 +85,8 @@ class ComponentManager:
             )
             return None
 
-    def load_component(self, component_path: Path):
+    @staticmethod
+    def load_component(component_path: Path):
         """Loads a component from a path."""
         log.debug(
             "Loading %s component from %s", component_path.parent.stem, component_path
@@ -95,3 +101,27 @@ class ComponentManager:
         spec.loader.exec_module(module)
 
         return module.ComponentView
+    
+    @staticmethod
+    def find_all_cm_paths(components_root: Path):
+        """Finds all component modules.
+        
+        A component module must contain a class that inherits a Component.
+        
+        it must also alias that view class to ComponentView in the same module."""
+        for path in components_root.rglob("*.py"):
+            if path.stem == "__init__":
+                continue
+            
+            with path.open("r") as f:
+                found_view_class = False
+                found_name = None
+                for line in f:
+                    if "class" in line and "View(" in line:
+                        found_view_class = True
+                        found_name = line.split("class")[1].split("(")[0].strip()
+                    if "ComponentView" in line and "=" in line and found_view_class:
+                        name = line.split("=")[1].strip()
+                        assert name == found_name, f"Name mismatch: {name} != {found_name}"
+                        yield name, path
+                        break

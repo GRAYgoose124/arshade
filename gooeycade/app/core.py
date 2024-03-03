@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 import arcade
 import logging
 from functools import singledispatchmethod
@@ -10,19 +11,17 @@ from .component import Component, ComponentManager
 
 
 class GooeyApp(arcade.Window, ComponentManager):
-    def __init__(self, components=None):
+    def __init__(self, components_root: Path):
         arcade.Window.__init__(
             self, 1280, 720, "Gooey Cade", gl_version=(4, 3), resizable=True
         )
-
         ComponentManager.__init__(self)
 
         self._views = {}
         self._default_view = None
         self._last_view = None
 
-        if components is not None:
-            self.hotload_new_components(components.all, components.root)
+        self.load_components(components_root, blacklist=["MetaView"])
 
     @property
     def views(self):
@@ -93,18 +92,24 @@ class GooeyApp(arcade.Window, ComponentManager):
         for view in self.views.values():
             self.update_view(view)
 
-    def load_components(self, component_paths: list[Path]):
-        """Loads components from a list of paths."""
-        for p in component_paths:
-            self.add_view(self.load_component(p)(), reloadable_path=p)
-
-    def hotload_new_components(
-        self, components: list[arcade.View], component_root: Path
+    def load_components(
+        self, components_root: Path, whitelist=None, blacklist=None, append_to_sys=True
     ):
-        """Given already loaded component modules, save the paths to them and
-        reload them when needed."""
-        for c in components:
-            p = self.discover_component_path(c, component_root)
-            self.add_view(c(), reloadable_path=p)
+        found = self.find_all_cm_paths(components_root)
+        
+        if append_to_sys and components_root not in sys.path:
+            sys.path.append(str(components_root))
 
-        log.debug("Loaded components: %s", self._component_paths)
+        if whitelist:
+            found = {name: path for name, path in found if name in whitelist}
+        if blacklist:
+            found = {name: path for name, path in found if name not in blacklist}
+
+        components = []
+        for p in found.values():
+            c = self.load_component(p)
+            self.add_view(c(), reloadable_path=p)
+            components.append(c)
+
+        return components
+

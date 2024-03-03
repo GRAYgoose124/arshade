@@ -1,3 +1,4 @@
+from pathlib import Path
 import arcade
 import logging
 
@@ -9,7 +10,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger("arcade").setLevel(logging.INFO)
 
-    app = GooeyApp(components)
+    app = GooeyApp(Path(__file__).parent / "components")
 
     app.start(default_view="primary")
 

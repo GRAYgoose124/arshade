@@ -37,7 +37,7 @@ import arcade
 
 from gooeycade.app.component import Component
 
-
+# A component view must end in View
 class NewComponentView(Component):
     def __init__(self):
         super().__init__()

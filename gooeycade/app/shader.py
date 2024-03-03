@@ -12,9 +12,6 @@ class ShaderViewComponent(Component):
         self._hidden_pause = False
         self._pause_shader = False
 
-    def setup(self):
-        pass
-
     def __unpause(self):
         self._pause_shader = False
         self._hidden_pause = False
