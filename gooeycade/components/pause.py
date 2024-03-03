@@ -14,7 +14,7 @@ class PauseView(Component):
         self._view_select_menu = None
         self._exit_dialog_handle = None
 
-        self._selected_view = "primary"
+        self._selected_view = "PrimaryView"
 
     def setup(self):
         self.uimanager = arcade.gui.UIManager()
@@ -24,7 +24,7 @@ class PauseView(Component):
         self._view_select_menu = self.__build_view_select_menu()
         self._exit_dialog_handle = None
 
-        self._selected_view = "primary"
+        self._selected_view = "PrimaryView"
 
         self.uimanager.add(
             arcade.gui.UIAnchorWidget(
@@ -171,10 +171,12 @@ class PauseView(Component):
 
         # self.window._views is a dictionary of views keyed by name
         for i, view_name in enumerate(self.window.views):
-            if view_name == "pause":
+            if view_name == "PauseView":
                 continue
 
-            view_button = arcade.gui.UIFlatButton(text=view_name, width=200, height=50)
+            view_button = arcade.gui.UIFlatButton(
+                text=self.window.views[view_name].title, width=200, height=50
+            )
             view_button.on_click = (
                 lambda _, view_name=view_name: self.__select_view(view_name)
                 or self.window._last_view
@@ -193,7 +195,7 @@ class PauseView(Component):
 
     # UI callbacks
     def __select_view(self, view_name):
-        self._selected_view = view_name or "pause"
+        self._selected_view = view_name or "PauseView"
         print(f"{self._selected_view=}")
         self.__resume_game(None)
 

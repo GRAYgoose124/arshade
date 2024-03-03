@@ -1,3 +1,4 @@
+import sys
 import arcade
 import logging
 import importlib.util
@@ -25,7 +26,11 @@ class Component(arcade.View):
 
     @property
     def name(self):
-        return self.__class__.__name__.replace("View", "").lower()
+        return self.__class__.__name__
+
+    @property
+    def title(self):
+        return self.name.replace("View", "").lower()
 
     @property
     def path(self):
@@ -36,30 +41,35 @@ class ComponentManager:
     def __init__(self):
         self._component_paths = {}
 
-    def can_reload(self, view):
+    def can_reload(self, component_view):
         """Returns whether the view can be reloaded."""
-        if isinstance(view, Component):
-            name = view.name
-        elif isinstance(view, str):
-            name = view
+        if isinstance(component_view, Component):
+            name = component_view.name
+        elif isinstance(component_view, str):
+            name = component_view
         else:
-            raise TypeError(f"View must be a Component or a string, not {type(view)}.")
+            raise TypeError(
+                f"View must be a Component or a string, not {type(component_view)}."
+            )
 
         return name in self._component_paths and self._component_paths[name] is not None
 
-    def get_component_path(self, view):
+    def get_component_path(self, component_view):
         """Returns the path to the component."""
-        if isinstance(view, Component):
-            name = view.name
-        elif isinstance(view, str):
-            name = view
+        if isinstance(component_view, Component):
+            name = component_view.name
+        elif isinstance(component_view, str):
+            name = component_view
         else:
-            raise TypeError(f"View must be a Component or a string, not {type(view)}.")
+            raise TypeError(
+                f"View must be a Component or a string, not {type(component_view)}."
+            )
 
         return self._component_paths[name]
 
     def add_component_path(self, view, path):
         """Adds a component path."""
+        log.debug("Adding component path for %s: %s", view, path)
         if isinstance(view, Component):
             name = view.name
         elif isinstance(view, str):
@@ -68,6 +78,10 @@ class ComponentManager:
             raise TypeError(f"View must be a Component or a string, not {type(view)}.")
 
         self._component_paths[name] = path
+
+    def append_component_path_to_sys(self, components_path):
+        if components_path not in sys.path:
+            sys.path.append(str(components_path))
 
     @staticmethod
     def discover_component_path(view, component_root: Path):
@@ -85,8 +99,7 @@ class ComponentManager:
             )
             return None
 
-    @staticmethod
-    def load_component(component_path: Path):
+    def load_component(self, component_path: Path):
         """Loads a component from a path."""
         log.debug(
             "Loading %s component from %s", component_path.parent.stem, component_path
@@ -100,19 +113,21 @@ class ComponentManager:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        return module.ComponentView
-    
+        c = module.ComponentView()
+        self.add_component_path(c, component_path)
+        return c
+
     @staticmethod
-    def find_all_cm_paths(components_root: Path):
+    def naive_find_all_cm_paths(components_root: Path):
         """Finds all component modules.
-        
+
         A component module must contain a class that inherits a Component.
-        
+
         it must also alias that view class to ComponentView in the same module."""
         for path in components_root.rglob("*.py"):
             if path.stem == "__init__":
                 continue
-            
+
             with path.open("r") as f:
                 found_view_class = False
                 found_name = None
@@ -122,6 +137,25 @@ class ComponentManager:
                         found_name = line.split("class")[1].split("(")[0].strip()
                     if "ComponentView" in line and "=" in line and found_view_class:
                         name = line.split("=")[1].strip()
-                        assert name == found_name, f"Name mismatch: {name} != {found_name}"
+                        assert (
+                            name == found_name
+                        ), f"Name mismatch: {name} != {found_name}"
                         yield name, path
                         break
+
+    @staticmethod
+    def glob_components(components_root: Path, whitelist=None, blacklist=None):
+        found = ComponentManager.naive_find_all_cm_paths(components_root)
+
+        if whitelist:
+            found = {name: path for name, path in found if name in whitelist}
+        if blacklist:
+            found = {name: path for name, path in found if name not in blacklist}
+
+        return found
+
+    def load_components(self, components_root: Path, whitelist=None, blacklist=None):
+        found = self.glob_components(components_root, whitelist, blacklist)
+
+        for name, path in found.items():
+            yield self.load_component(path)

@@ -1,4 +1,5 @@
 """ Thanks to https://github.com/pvcraven/n-body for the example. """
+
 import arcade
 import arcade.gl
 import time

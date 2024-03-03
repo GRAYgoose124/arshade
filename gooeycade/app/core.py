@@ -10,106 +10,150 @@ log = logging.getLogger(__name__)
 from .component import Component, ComponentManager
 
 
-class GooeyApp(arcade.Window, ComponentManager):
-    def __init__(self, components_root: Path):
-        arcade.Window.__init__(
-            self, 1280, 720, "Gooey Cade", gl_version=(4, 3), resizable=True
-        )
+class SwappableViewWindow(arcade.Window, ComponentManager):
+    def __init__(self, *args, **kwargs):
+        arcade.Window.__init__(self, *args, **kwargs)
         ComponentManager.__init__(self)
 
         self._views = {}
         self._default_view = None
         self._last_view = None
 
-        self.load_components(components_root, blacklist=["MetaView"])
-
     @property
     def views(self):
         return self._views
 
-    def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            self.show_view("pause")
+    @property
+    def view_names(self):
+        return list(self._views.keys())
 
-    def start(self, default_view=None):
-        if default_view is not None:
-            if default_view not in self.views:
-                raise ValueError(f"View '{default_view}' does not exist.")
+    @property
+    def view_titles(self):
+        return [v.title for v in self._views.values()]
 
-            self._default_view = default_view
-        log.info(
-            "Starting Gooey Cade\nViews: %s", [v.name for v in self.views.values()]
-        )
-        for view in self.views.values():
-            view.setup()
+    @property
+    def current_view(self):
+        return self._current_view
 
-        self.center_window()
-        self.show_view(self._default_view)
+    @property
+    def default_view(self):
+        return self._default_view
 
-        arcade.run()
+    @property
+    def last_view(self):
+        return self._last_view
 
-    def show_view(self, view):
+    def show_view(self, view=None):
+        """Shows a view."""
+        if view is None:
+            view = self.default_view
+
         if view not in self.views:
             raise ValueError(f"View '{view}' does not exist.")
 
-        self._last_view = self._current_view or self._default_view or view
+        self._last_view = self.current_view or self.default_view or view
 
         super().show_view(self.views[view])
 
     def set_default_view(self, view):
+        if view is None:
+            return
+
         if view not in self.views:
             raise ValueError(f"View '{view}' does not exist.")
 
         self._default_view = view
 
-    def add_view(self, view, reloadable_path=None):
+    def add_view(self, view):
         """Adds a view to the app."""
-        if reloadable_path is not None:
-            self.add_component_path(view, reloadable_path)
-
         if view.name in self._views:
             log.warning("View '%s' already exists, overwriting.", view.name)
-            del self._views[view.name]
             # force GC
+            del self._views[view.name]
 
         self._views[view.name] = view
 
-        if self._default_view is None:
-            self._default_view = view.name
+        if self.default_view is None:
+            self.set_default_view(view.name)
 
-    def update_view(self, vname):
+    def reload_view(self, vname):
         """Updates a view."""
-        self.show_view("pause")
+        self.show_view("PauseView")
         if self.can_reload(vname):
             p = self.get_component_path(vname)
-            log.info("Reloading view '%s' from %s", vname, p)
-            self.add_view(self.load_component(p)(), reloadable_path=p)
-            log.info("Updated view '%s'", self.views[vname])
+            log.debug("Reloading view '%s' from %s", vname, p)
+            self.add_view(self.load_component(p))
             self.views[vname].setup()
+            log.info("Updated view '%s'", self.views[vname])
 
-    def update_views(self):
+    def reload_views(self):
         """Updates the views."""
+        for view in self.views:
+            self.reload_view(view)
+
+    def remove_view(self, vname, no_reload=False):
+        """Removes a view from the app."""
+        if vname not in self.views:
+            raise ValueError(f"View '{vname}' does not exist.")
+
+        if self.can_reload(vname) and no_reload:
+            del self._component_paths[vname]
+
+        if self._default_view == vname:
+            self.set_default_view(self.last_view)
+
+        del self._views[vname]
+
+    def remove_views(self):
+        """Removes all views from the app."""
+        for view in self.views:
+            self.remove_view(view)
+
+    def setup_views(self):
+        """Sets up the views."""
         for view in self.views.values():
-            self.update_view(view)
+            view.setup()
 
-    def load_components(
-        self, components_root: Path, whitelist=None, blacklist=None, append_to_sys=True
+
+class GooeyApp(SwappableViewWindow):
+    def __init__(self, *args, **kwargs):
+        SwappableViewWindow.__init__(self, *args, **kwargs)
+
+    def start(
+        self,
+        components_path,
+        default_view="PrimaryView",
+        blacklist=["MetaView"],
+        whitelist=None,
     ):
-        found = self.find_all_cm_paths(components_root)
-        
-        if append_to_sys and components_root not in sys.path:
-            sys.path.append(str(components_root))
+        log.info("Gooey Cade starting up")
 
-        if whitelist:
-            found = {name: path for name, path in found if name in whitelist}
-        if blacklist:
-            found = {name: path for name, path in found if name not in blacklist}
+        # load components
+        log.info("Loading components from %s", components_path)
+        self.append_component_path_to_sys(components_path)
 
-        components = []
-        for p in found.values():
-            c = self.load_component(p)
-            self.add_view(c(), reloadable_path=p)
-            components.append(c)
+        log.debug("Loading core views")
+        core_vs = ["PrimaryView", "PauseView"]
+        for c in self.load_components(components_path, whitelist=core_vs):
+            self.add_view(c)
 
-        return components
+        log.debug("Loading other views")
+        for c in self.load_components(
+            components_path, blacklist=core_vs + blacklist, whitelist=whitelist
+        ):
+            self.add_view(c)
 
+        # set up views
+        log.debug("Setting up views")
+        self.setup_views()
+        self.set_default_view(default_view)
+        self.show_view()
+
+        # start app
+        log.info("App started")
+        self.center_window()
+        arcade.run()
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.ESCAPE:
+            self.show_view("PauseView")
