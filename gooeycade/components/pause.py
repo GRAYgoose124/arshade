@@ -15,6 +15,7 @@ class PauseView(Component):
         self._exit_dialog_handle = None
 
         self._selected_view = "PrimaryView"
+        self.needs_reload = False
 
     def setup(self):
         self.uimanager = arcade.gui.UIManager()
@@ -33,10 +34,13 @@ class PauseView(Component):
         )
 
     def on_resize(self, width: int, height: int):
-        self.setup()
-        return super().on_resize(width, height)
+        self.needs_reload = True
 
     def on_show(self):
+        if self.needs_reload:
+            self.setup()
+            self.needs_reload = False
+
         arcade.set_background_color(arcade.color.AMAZON)
         self.uimanager.enable()
 

@@ -16,6 +16,8 @@ class SwappableViewWindow(arcade.Window, ComponentManager):
         self._default_view = None
         self._last_view = None
 
+        self.needs_reload = False
+
     @property
     def views(self):
         return self._views
@@ -73,20 +75,29 @@ class SwappableViewWindow(arcade.Window, ComponentManager):
         if self.default_view is None:
             self.set_default_view(view.name)
 
-    def reload_view(self, vname):
+    def reload_view(self, vname, pause=True):
         """Updates a view."""
-        self.show_view("PauseView")
         if self.can_reload(vname):
+            if pause:
+                self.show_view("PauseView")
             p = self.get_component_path(vname)
             log.debug("Reloading view '%s' from %s", vname, p)
             self.add_view(self.load_component(p))
             self.views[vname].setup()
             log.info("Updated view '%s'", self.views[vname])
+            if pause:
+                self.show_view(vname)
 
     def reload_views(self):
         """Updates the views."""
-        for view in self.views:
-            self.reload_view(view)
+        # TODO: don't reload core views and only load components lazily
+        views_copy = self.views.copy()
+
+        current_view = self.current_view
+        self.show_view("PauseView")
+        for view in views_copy:
+            self.reload_view(view, pause=False)
+        self.show_view(current_view)
 
     def remove_view(self, vname, no_reload=False):
         """Removes a view from the app."""

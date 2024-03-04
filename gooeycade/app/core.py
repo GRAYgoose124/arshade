@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class GooeyApp(SwappableViewWindow):
     def __init__(self, *args, **kwargs):
-        SwappableViewWindow.__init__(self, *args, **kwargs)
+        SwappableViewWindow.__init__(self, *args, **kwargs, center_window=True)
 
     def start(
         self,
@@ -43,7 +43,6 @@ class GooeyApp(SwappableViewWindow):
 
         # start app
         log.info("App started")
-        self.center_window()
         arcade.run()
 
     def on_key_press(self, key, modifiers):

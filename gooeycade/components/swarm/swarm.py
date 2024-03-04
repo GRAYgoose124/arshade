@@ -76,7 +76,7 @@ class Swarm:
 
     def _gen_initial_data(self, initial_x, initial_y):
         """Generate data for each particle"""
-        radius = 10.0
+        radius = 3.0
         for i in range(Swarm.AGENT_COUNT):
             # Position/radius
 
